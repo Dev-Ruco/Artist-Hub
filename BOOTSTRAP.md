@@ -1,0 +1,1 @@
+Inicialização técnica temporária para o primeiro commit do Artist Hub. Será substituída pelo código do projecto.
