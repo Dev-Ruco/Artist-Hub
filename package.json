@@ -1,0 +1,13 @@
+{
+  "name": "artist-platform",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": ["apps/mobile"],
+  "scripts": {
+    "start": "npm run start -w @artist-platform/mobile",
+    "android": "npm run android -w @artist-platform/mobile",
+    "ios": "npm run ios -w @artist-platform/mobile",
+    "typecheck": "npm run typecheck -w @artist-platform/mobile"
+  },
+  "engines": { "node": ">=22.13.0" }
+}

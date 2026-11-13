@@ -1,0 +1,17 @@
+node_modules/
+.expo/
+dist/
+build/
+.env
+.env.*
+!.env.example
+.DS_Store
+*.log
+.idea/
+.vscode/
+*.p8
+*.pem
+*.jks
+*.keystore
+*.mobileprovision
+coverage/
