@@ -1,11 +1,12 @@
 import React from 'react';
+import type { ColorValue } from 'react-native';
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { palette } from '../../src/theme/tokens';
 
 type IconName = React.ComponentProps<typeof Ionicons>['name'];
-function TabIcon({ name, focused, color }: { name: IconName; focused: boolean; color: string }) {
-  return <Ionicons name={name} size={focused ? 23 : 21} color={color} />;
+function TabIcon({ name, focused, color }: { name: IconName; focused: boolean; color: ColorValue }) {
+  return <Ionicons name={name} size={focused ? 23 : 21} color={typeof color === 'string' ? color : palette.muted} />;
 }
 export default function TabLayout() {
   return <Tabs screenOptions={{ headerShown: false, tabBarActiveTintColor: palette.accent,
