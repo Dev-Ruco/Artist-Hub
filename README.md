@@ -86,3 +86,18 @@ O URL acima só será válido **depois** de criar o repositório. Nenhum reposit
 - [Especificação técnica](docs/especificacao-tecnica.md)
 - [Arquitectura multiartista](docs/arquitectura-multiartista.md)
 - [Roadmap](docs/roadmap.md)
+
+
+## Pré-visualização Web no Coolify (Docker)
+
+Foi acrescentado o suporte de **exportação Web** da aplicação React Native para testar o piloto num URL provisório. O projecto móvel continua a ser a fonte de verdade; esta opção não substitui APK/IPA.
+
+- `Dockerfile` na raiz: compila o Expo Web e publica o resultado com Nginx;
+- `deploy/nginx.conf`: porta interna **80** e encaminhamento de rotas para `index.html`;
+- `npm run build:web`: constrói a versão Web de demonstração;
+- `/healthz`: endpoint de saúde.
+- Ver [instruções exactas para Coolify](docs/coolify.md).
+
+**Coolify:** seleccione build por Dockerfile, localização `/Dockerfile`, base `/`, branch `main`, porta exposta `80`. Grave e faça `Redeploy`. Se aparecer 502, verifique os logs e a porta exposta.
+
+Nota: referências anteriores a criar um novo repositório são apenas instruções do starter; a versão actual está em `Dev-Ruco/Artist-Hub`.

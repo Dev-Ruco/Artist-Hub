@@ -14,10 +14,24 @@
     },
     "android": {
       "package": "mz.artistplatform.pilot",
-      "adaptiveIcon": { "backgroundColor": "#080A0F" }
+      "adaptiveIcon": {
+        "backgroundColor": "#080A0F"
+      }
     },
-    "plugins": ["expo-router", "expo-splash-screen"],
-    "experiments": { "typedRoutes": true },
-    "extra": { "pilotArtistSlug": "artista-piloto" }
+    "plugins": [
+      "expo-router",
+      "expo-splash-screen"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "pilotArtistSlug": "artista-piloto"
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "single",
+      "name": "Artist Hub — Piloto"
+    }
   }
 }

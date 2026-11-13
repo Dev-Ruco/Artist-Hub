@@ -1,0 +1,14 @@
+.git
+.github
+node_modules
+**/node_modules
+.expo
+**/.expo
+**/dist
+**/build
+**/.env
+**/.env.*
+!**/.env.example
+README.md
+docs
+infra
