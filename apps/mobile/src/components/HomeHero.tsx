@@ -1,8 +1,20 @@
-import React from 'react';
-import { Image, Platform, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import React, { useState } from 'react';
+import {
+  Image,
+  Platform,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+  useWindowDimensions,
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import type { Artist } from '../types/domain';
+
+// Esta imagem é incluída no bundle React Native (Android, iOS e Web).
+// A origem original mantém-se intacta em assets/artists/mr-bow/.
+const MR_BOW_HERO = require('../../assets/artists/mr-bow/hero.jpeg');
 
 type Props = {
   artist: Artist;
@@ -10,116 +22,285 @@ type Props = {
   onUpdates: () => void;
   onCommunity: () => void;
 };
+
 const condensedFont = Platform.select({
   ios: 'HelveticaNeue-CondensedBold',
   android: 'sans-serif-condensed',
   default: 'Impact, "Arial Narrow", sans-serif',
 });
+
 function initials(name: string) {
-  return name.split(/\s+/).slice(0, 2).map(part => part.charAt(0)).join('').toUpperCase();
+  return name
+    .split(/\s+/)
+    .slice(0, 2)
+    .map(part => part.charAt(0))
+    .join('')
+    .toUpperCase();
 }
+
 export function HomeHero({ artist, greeting, onUpdates, onCommunity }: Props) {
   const { width, height } = useWindowDimensions();
-  const compact = width < 375;
-  const desktop = width >= 750;
-  const typeSize = desktop ? 112 : compact ? 62 : 78;
-  const sectionHeight = desktop ? 735 : Math.min(775, Math.max(655, height - 132));
+  const [failedUri, setFailedUri] = useState<string | null>(null);
+  const mobile = width < 750;
+  const narrow = width < 375;
+  const heroHeight = mobile
+    ? Math.min(820, Math.max(670, Math.round(height * 0.96)))
+    : 730;
+  const typeSize = mobile ? (narrow ? 63 : 80) : 110;
+  const photoHeight = mobile ? Math.round(heroHeight * 0.82) : heroHeight;
+
+  const isMrBow = artist.slug.trim().toLowerCase() === 'mr-bow';
+  const remote = artist.banner_url?.trim();
+  const useRemote = !isMrBow && Boolean(remote) && failedUri !== remote;
+  const imageSource = isMrBow ? MR_BOW_HERO : useRemote ? { uri: remote! } : null;
+  const hasPhoto = imageSource !== null;
+
   const words = artist.display_name.toUpperCase().trim().split(/\s+/);
   const title = words.length <= 3 ? words.join('\n') : artist.display_name.toUpperCase();
-  // Permite imagens remotas por artista; no piloto Mr Bow usamos a fotografia original guardada no repositório.
-  // O require estático assegura que a imagem é incluída em Android, iOS e Expo Web.
-  const imageSource = artist.banner_url?.trim()
-    ? { uri: artist.banner_url.trim() }
-    : artist.slug === 'mr-bow'
-      ? require('../../assets/artists/mr-bow/hero.jpeg')
-      : null;
-  const hasImage = Boolean(imageSource);
-  return <View style={[styles.hero, { height: sectionHeight, paddingHorizontal: desktop ? 52 : compact ? 22 : 27 }]}>
-    <LinearGradient colors={['#795130', '#2B1E1A', '#08080B']} start={{x:1,y:0}} end={{x:0.08,y:1}}
-      style={StyleSheet.absoluteFill}/>
-    {hasImage ? <Image source={imageSource} style={desktop
-      ? { position: 'absolute', top: 0, right: 0, width: '65%', height: '100%' }
-      : StyleSheet.absoluteFill}
-      resizeMode="cover" accessibilityLabel={'Fotografia de ' + artist.display_name}/> : <>
-      <View style={styles.posterRuleA}/>
-      <View style={styles.posterRuleB}/>
-      <Text accessibilityElementsHidden importantForAccessibility="no-hide-descendants"
-        style={[styles.monogram, {fontSize:desktop ? 390 : 244,right: desktop ? -18 : -40}]}>{initials(artist.display_name)}</Text>
-    </>}
-    <LinearGradient colors={['rgba(7,7,9,0.5)', 'rgba(7,7,9,0.12)', 'rgba(7,7,9,0.32)', 'rgba(7,7,9,0.97)']}
-      locations={[0,0.27,0.57,1]} style={StyleSheet.absoluteFill}/>
-    <LinearGradient colors={['rgba(7,7,9,0.50)', 'rgba(7,7,9,0)']}
-      start={{x:0,y:0.5}} end={{x:1,y:0.5}} style={StyleSheet.absoluteFill}/>
-    <View style={styles.heroContent}>
-      <View style={styles.topRow}>
-        <View style={{ flex: 1, gap: 5 }}>
-          <Text style={[styles.greeting,{fontSize:desktop ? 27 : 23}]}>{greeting}</Text>
-          <Text style={styles.greetingSub}>O teu espaço, mais perto da música.</Text>
-        </View>
-        <View style={styles.brandBadge} accessibilityLabel="Artist Hub">
-          <Ionicons name="musical-notes-outline" size={22} color="#FFFFFF"/>
-        </View>
+
+  return (
+    <View style={[styles.hero, {
+      height: heroHeight,
+      paddingHorizontal: mobile ? (narrow ? 20 : 26) : 54,
+      paddingTop: mobile ? 23 : 34,
+      paddingBottom: mobile ? 31 : 42,
+    }]}>
+      {/* Primeiro plano da fotografia: ocupa a maior parte do ecrã móvel,
+          sem depender de um URL externo nem de estilos Web específicos. */}
+      <View pointerEvents="none" style={[
+        styles.photoArea,
+        mobile
+          ? { left: 0, right: 0, top: 0, height: photoHeight }
+          : { right: 0, top: 0, width: '72%', height: '100%' },
+      ]}>
+        {hasPhoto ? (
+          <Image
+            key={artist.id + (isMrBow ? '-local' : '-remote')}
+            source={imageSource}
+            accessibilityLabel={'Fotografia de ' + artist.display_name}
+            resizeMode="cover"
+            onError={() => { if (useRemote && remote) setFailedUri(remote); }}
+            style={styles.photo}
+          />
+        ) : (
+          <View style={styles.placeholder}>
+            <Text style={styles.monogram}>{initials(artist.display_name)}</Text>
+          </View>
+        )}
       </View>
-      <View style={styles.bottomContent}>
-        {!hasImage ? <View style={styles.photoWaiting}>
-          <Ionicons name="image-outline" size={14} color="#F0D2AE"/>
-          <Text style={styles.photoWaitingText}>FOTOGRAFIA DE CAPA EM PREPARAÇÃO</Text>
-        </View> : null}
-        <View style={[styles.identityPill,{backgroundColor:artist.accent_color}]}>
-          <Text style={styles.identityText}>O UNIVERSO DO ARTISTA</Text>
+
+      {/* No telemóvel, o rosto fica visível na metade superior.
+          O gradiente escurece apenas a parte inferior, por detrás do texto. */}
+      <LinearGradient
+        pointerEvents="none"
+        colors={mobile
+          ? ['rgba(8,8,10,0.24)', 'rgba(8,8,10,0.02)', 'rgba(8,8,10,0.06)',
+              'rgba(8,8,10,0.58)', '#09090B', '#09090B']
+          : ['rgba(8,8,10,0.58)', 'rgba(8,8,10,0.18)', 'rgba(8,8,10,0.30)', '#09090B']}
+        locations={mobile ? [0, 0.19, 0.44, 0.68, 0.87, 1] : [0, 0.28, 0.66, 1]}
+        style={StyleSheet.absoluteFill}
+      />
+      {!mobile ? (
+        <LinearGradient
+          pointerEvents="none"
+          colors={['#09090B', 'rgba(9,9,11,0.90)', 'rgba(9,9,11,0.00)']}
+          start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
+          style={StyleSheet.absoluteFill}
+        />
+      ) : null}
+
+      <View style={styles.content}>
+        <View style={styles.header}>
+          <View style={styles.headerText}>
+            <Text style={[styles.greeting, { fontSize: mobile ? 23 : 28 }]}>{greeting}</Text>
+            <Text style={styles.subtitle}>Novidades e momentos perto de ti.</Text>
+          </View>
+          <View accessibilityLabel="Artist Hub" style={styles.brand}>
+            <Ionicons name="musical-notes-outline" size={22} color="#FFFFFF"/>
+          </View>
         </View>
-        <Text adjustsFontSizeToFit numberOfLines={4}
-          style={[styles.artistName,{fontFamily:condensedFont,fontSize:typeSize,lineHeight:typeSize*0.96,
-            maxWidth:desktop ? 620 : '100%'}]}>{title}</Text>
-        <Text style={[styles.tagline,{maxWidth:desktop ? 530 : 345}]}>
-          {artist.tagline || 'Música, momentos e novidades. Tudo mais perto de ti.'}
-        </Text>
-        <View style={[styles.actionRow,{marginTop:compact ? 17 : 27}]}>
-          <Pressable accessibilityRole="button" accessibilityLabel="Ver as últimas novidades"
-            onPress={onUpdates} style={({pressed}) => [styles.mainAction,
-              {backgroundColor:artist.accent_color},pressed && styles.pressed]}>
-            <Text style={styles.mainActionText}>Novidades</Text>
-            <Ionicons name="arrow-forward" size={20} color="#18110B"/>
-          </Pressable>
-          <Pressable accessibilityRole="button" accessibilityLabel="Abrir comunidade"
-            onPress={onCommunity} style={({pressed}) => [styles.secondaryAction,pressed && styles.pressed]}>
-            <Ionicons name="people-outline" size={19} color="#FFFFFF"/>
-            <Text style={styles.secondaryActionText}>Comunidade</Text>
-          </Pressable>
+
+        <View style={[styles.body, { maxWidth: mobile ? '100%' : 600 }]}>
+          <View style={[styles.pill, { backgroundColor: artist.accent_color }]}>
+            <Text style={styles.pillText}>ESPAÇO OFICIAL DO ARTISTA</Text>
+          </View>
+          <Text
+            adjustsFontSizeToFit
+            numberOfLines={4}
+            style={[styles.name, {
+              fontFamily: condensedFont,
+              fontSize: typeSize,
+              lineHeight: typeSize * 0.94,
+              maxWidth: mobile ? '100%' : 570,
+            }]}
+          >
+            {title}
+          </Text>
+          <Text style={[styles.tagline, { fontSize: mobile ? 14 : 17 }]}>
+            {artist.tagline || 'A tua música, a tua comunidade e os teus momentos.'}
+          </Text>
+
+          <View style={styles.actions}>
+            <Pressable
+              onPress={onUpdates}
+              accessibilityRole="button"
+              accessibilityLabel="Ver as novidades"
+              style={({ pressed }) => [
+                styles.primaryButton,
+                { backgroundColor: artist.accent_color },
+                pressed && styles.pressed,
+              ]}>
+              <Text style={styles.primaryText}>Novidades</Text>
+              <Ionicons name="arrow-forward" size={19} color="#18110B"/>
+            </Pressable>
+            <Pressable
+              onPress={onCommunity}
+              accessibilityRole="button"
+              accessibilityLabel="Entrar na comunidade"
+              style={({ pressed }) => [styles.secondaryButton, pressed && styles.pressed]}>
+              <Ionicons name="people-outline" size={19} color="#FFFFFF"/>
+              <Text style={styles.secondaryText}>Comunidade</Text>
+            </Pressable>
+          </View>
         </View>
       </View>
     </View>
-  </View>;
+  );
 }
+
 const styles = StyleSheet.create({
-  hero: {width:'100%',position:'relative',overflow:'hidden',backgroundColor:'#15110D',paddingTop:26,paddingBottom:32},
-  heroContent: {flex:1,justifyContent:'space-between'},
-  topRow: {flexDirection:'row',alignItems:'flex-start',gap:15},
-  greeting: {color:'#FFFFFF',fontWeight:'800',letterSpacing:-0.55},
-  greetingSub: {color:'#E2DDD5',fontSize:13,lineHeight:19},
-  brandBadge: {width:43,height:43,borderRadius:22,alignItems:'center',justifyContent:'center',
-    backgroundColor:'rgba(8,8,10,0.48)',borderWidth:1,borderColor:'rgba(255,255,255,0.18)'},
-  bottomContent: {gap:14,alignItems:'flex-start'},
-  identityPill: {borderRadius:100,paddingHorizontal:17,paddingVertical:11},
-  identityText: {color:'#211408',fontSize:11,fontWeight:'900',letterSpacing:1},
-  artistName: {color:'#FFFFFF',fontWeight:'900',letterSpacing:-1.9,
-    textShadowColor:'rgba(0,0,0,0.32)',textShadowRadius:12,textShadowOffset:{width:0,height:4}},
-  tagline: {color:'#E3D8CE',fontSize:16,lineHeight:24,marginTop:2},
-  actionRow: {width:'100%',flexDirection:'row',alignItems:'stretch',gap:10},
-  mainAction: {flex:1.15,height:58,borderRadius:30,flexDirection:'row',alignItems:'center',
-    justifyContent:'center',paddingHorizontal:12,gap:9},
-  mainActionText: {color:'#18110B',fontSize:15,fontWeight:'900'},
-  secondaryAction: {flex:1,height:58,borderRadius:30,flexDirection:'row',alignItems:'center',
-    justifyContent:'center',paddingHorizontal:10,gap:7,borderWidth:1.4,
-    borderColor:'rgba(255,255,255,0.83)',backgroundColor:'rgba(10,10,11,0.33)'},
-  secondaryActionText: {color:'#FFFFFF',fontSize:13,fontWeight:'800'},
-  pressed: {opacity:0.72},
-  posterRuleA: {position:'absolute',width:430,height:110,backgroundColor:'rgba(249,174,72,0.10)',
-    transform:[{rotate:'-24deg'}],top:120,right:-165},
-  posterRuleB: {position:'absolute',width:430,height:120,backgroundColor:'rgba(255,255,255,0.045)',
-    transform:[{rotate:'-24deg'}],top:330,right:-100},
-  monogram: {position:'absolute',top:200,color:'rgba(255,234,207,0.11)',fontWeight:'900',
-    letterSpacing:-26,transform:[{rotate:'-14deg'}]},
-  photoWaiting: {flexDirection:'row',gap:6,alignItems:'center',marginBottom:3},
-  photoWaitingText: {fontSize:9,letterSpacing:1.3,fontWeight:'800',color:'#F0D2AE'},
+  hero: {
+    width: '100%',
+    backgroundColor: '#09090B',
+    overflow: 'hidden',
+    position: 'relative',
+  },
+  photoArea: {
+    position: 'absolute',
+    overflow: 'hidden',
+    backgroundColor: '#4C392D',
+  },
+  photo: {
+    width: '100%',
+    height: '100%',
+  },
+  placeholder: {
+    width: '100%',
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#3F3329',
+  },
+  monogram: {
+    fontSize: 220,
+    fontWeight: '900',
+    letterSpacing: -16,
+    color: 'rgba(255,255,255,0.13)',
+  },
+  content: {
+    flex: 1,
+    justifyContent: 'space-between',
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 12,
+  },
+  headerText: {
+    flex: 1,
+    gap: 5,
+  },
+  greeting: {
+    fontWeight: '800',
+    color: '#FFFFFF',
+    textShadowColor: 'rgba(0,0,0,0.36)',
+    textShadowRadius: 8,
+    textShadowOffset: { width: 0, height: 2 },
+  },
+  subtitle: {
+    color: '#FFFFFF',
+    fontSize: 13,
+    lineHeight: 19,
+    textShadowColor: 'rgba(0,0,0,0.46)',
+    textShadowRadius: 6,
+    textShadowOffset: { width: 0, height: 1 },
+  },
+  brand: {
+    width: 43,
+    height: 43,
+    borderRadius: 22,
+    backgroundColor: 'rgba(8,8,10,0.50)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.25)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  body: {
+    gap: 13,
+    alignItems: 'flex-start',
+  },
+  pill: {
+    borderRadius: 40,
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+  },
+  pillText: {
+    color: '#221508',
+    fontSize: 10,
+    letterSpacing: 1,
+    fontWeight: '900',
+  },
+  name: {
+    color: '#FFFFFF',
+    fontWeight: '900',
+    letterSpacing: -1.7,
+    textShadowColor: 'rgba(0,0,0,0.35)',
+    textShadowRadius: 10,
+    textShadowOffset: { width: 0, height: 3 },
+  },
+  tagline: {
+    color: '#EDE6DF',
+    lineHeight: 22,
+    maxWidth: 360,
+  },
+  actions: {
+    flexDirection: 'row',
+    gap: 10,
+    marginTop: 14,
+    width: '100%',
+  },
+  primaryButton: {
+    flex: 1.1,
+    minHeight: 56,
+    borderRadius: 29,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingHorizontal: 12,
+  },
+  primaryText: {
+    fontSize: 15,
+    color: '#18110B',
+    fontWeight: '900',
+  },
+  secondaryButton: {
+    flex: 1,
+    minHeight: 56,
+    borderRadius: 29,
+    borderWidth: 1.4,
+    borderColor: 'rgba(255,255,255,0.9)',
+    backgroundColor: 'rgba(11,11,13,0.24)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'row',
+    gap: 6,
+    paddingHorizontal: 8,
+  },
+  secondaryText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '800',
+  },
+  pressed: { opacity: 0.74 },
 });
