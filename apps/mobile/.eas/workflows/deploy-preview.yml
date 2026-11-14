@@ -10,3 +10,12 @@ jobs:
     environment: preview
     params:
       prod: false
+    hooks:
+      after_checkout:
+        - name: Associar projecto Expo existente
+          run: |
+            if [ -z "${EAS_BUILD_PROJECT_ID:-}" ]; then
+              echo "Identificador do projecto Expo nao disponivel neste executor."
+              exit 1
+            fi
+            npx --yes eas-cli@latest init --id "$EAS_BUILD_PROJECT_ID" --non-interactive

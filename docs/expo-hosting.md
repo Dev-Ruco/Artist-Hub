@@ -82,3 +82,11 @@ Por omissão, um ambiente de demonstração com dados fictícios. Para integraç
 - No Expo Dashboard, consulte os logs da publicação e a URL atribuída.
 
 Documentação oficial: https://docs.expo.dev/eas/hosting/get-started/
+
+## Correcção da associação Expo no fluxo automático
+
+O projecto Expo já criado é `@ruco222/ruco`. A aplicação conserva o nome visível "Artist Hub - Piloto" e utiliza no `app.json` os valores `owner: ruco222` e `slug: ruco`, que correspondem à conta Expo ligada ao repositório.
+
+O fluxo `deploy-preview.yml` inclui um hook `after_checkout` que associa automaticamente o projecto existente com o identificador `EAS_BUILD_PROJECT_ID`, fornecido pelo executor dos Expo Workflows. Assim, não cria um segundo projecto em cada publicação e evita a falha "EAS project not configured" em modo não interactivo.
+
+Para o desenvolvimento local, associe uma vez o projecto usando o comando completo `eas init --id ...` mostrado no painel Expo; o identificador não foi inserido neste repositório porque a captura anterior não o apresentava por completo.

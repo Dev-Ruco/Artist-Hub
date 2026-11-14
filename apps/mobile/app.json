@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Artist Hub - Piloto",
-    "slug": "artist-hub-piloto",
+    "slug": "ruco",
     "scheme": "artisthub",
     "version": "0.1.0",
     "orientation": "portrait",
@@ -32,6 +32,7 @@
       "bundler": "metro",
       "output": "single",
       "name": "Artist Hub — Piloto"
-    }
+    },
+    "owner": "ruco222"
   }
 }
