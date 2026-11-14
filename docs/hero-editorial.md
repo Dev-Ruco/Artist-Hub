@@ -12,10 +12,10 @@ Não reutilizamos a fotografia, o nome ou os elementos gráficos do artista de r
 - Saudações adaptadas à hora local; o nome só aparece quando existir no perfil autenticado.
 - Acções efectivas: **Novidades** desloca a página e **Comunidade** abre o separador correspondente.
 - Ecrã inicial com cartões de novidades, filtro/selector de artistas e dados de demonstração identificados.
-- O piloto usa o nome Mr Bow apenas como exemplo visual, sem atribuir conteúdos ou eventos reais ao artista.
+- O piloto usa o nome Mr. Bow apenas como exemplo visual, sem atribuir conteúdos ou eventos reais ao artista.
 
 ## Fotografia a fornecer
-A fotografia de Mr Bow deverá:
+A fotografia de Mr. Bow deverá:
 - estar autorizada para utilização no projecto;
 - ser vertical, preferencialmente 3:4 ou 4:5, com boa resolução;
 - ter o artista no lado direito e espaço livre no lado esquerdo para o texto;
