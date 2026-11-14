@@ -1,10 +1,11 @@
-name: Artist Hub — pré-visualização Web
+name: Artist Hub — pre-visualizacao Web
 on:
   push:
     branches: ['main']
+  workflow_dispatch: {}
 jobs:
   deploy_web:
-    name: Publicar Expo Hosting (pré-visualização)
+    name: Publicar Expo Hosting (preview)
     type: deploy
     environment: preview
     params:
