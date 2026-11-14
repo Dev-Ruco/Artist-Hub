@@ -12,10 +12,6 @@ jobs:
       prod: false
     hooks:
       after_checkout:
-        - name: Associar projecto Expo existente
+        - name: Associar projecto Expo ruco222/ruco
           run: |
-            if [ -z "${EAS_BUILD_PROJECT_ID:-}" ]; then
-              echo "Identificador do projecto Expo nao disponivel neste executor."
-              exit 1
-            fi
-            npx --yes eas-cli@latest init --id "$EAS_BUILD_PROJECT_ID" --non-interactive
+            npx --yes eas-cli@latest init --account ruco222 --non-interactive
