@@ -11,7 +11,9 @@
     "ios": "npm run ios -w @artist-platform/mobile",
     "typecheck": "npm run typecheck -w @artist-platform/mobile",
     "web": "npm run web -w @artist-platform/mobile",
-    "build:web": "npm run build:web -w @artist-platform/mobile"
+    "build:web": "npm run build:web -w @artist-platform/mobile",
+    "deploy:web:preview": "npm run build:web && cd apps/mobile && npx --yes eas-cli@latest deploy",
+    "deploy:web:production": "npm run build:web && cd apps/mobile && npx --yes eas-cli@latest deploy --prod"
   },
   "engines": {
     "node": ">=22.13.0"

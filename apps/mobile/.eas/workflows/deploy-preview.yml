@@ -1,0 +1,11 @@
+name: Artist Hub — pré-visualização Web
+on:
+  push:
+    branches: ['main']
+jobs:
+  deploy_web:
+    name: Publicar Expo Hosting (pré-visualização)
+    type: deploy
+    environment: preview
+    params:
+      prod: false

@@ -101,3 +101,15 @@ Foi acrescentado o suporte de **exportação Web** da aplicação React Native p
 **Coolify:** seleccione build por Dockerfile, localização `/Dockerfile`, base `/`, branch `main`, porta exposta `80`. Grave e faça `Redeploy`. Se aparecer 502, verifique os logs e a porta exposta.
 
 Nota: referências anteriores a criar um novo repositório são apenas instruções do starter; a versão actual está em `Dev-Ruco/Artist-Hub`.
+
+## Expo Hosting — pré-visualização pelo navegador
+
+Para testar a aplicação sem Coolify, utilize o **Expo Hosting**. A aplicação já pode ser exportada para Web e o repositório inclui um fluxo de pré-visualização Expo Workflows.
+
+- Primeira publicação: requer ligação do projecto à sua conta Expo (`eas init` + `eas deploy`).
+- Publicações seguintes: `npm run deploy:web:preview` na raiz do repositório.
+- Automatização: `apps/mobile/.eas/workflows/deploy-preview.yml`; requer ligação GitHub ↔ Expo e **Base directory** = `apps/mobile`.
+- **Não existe um URL de Expo válido antes de a primeira publicação estar concluída.**
+
+Veja [as instruções completas de Expo Hosting](docs/expo-hosting.md).
+
