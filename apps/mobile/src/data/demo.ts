@@ -3,7 +3,7 @@ import type { Artist, Post, ArtistEvent } from '../types/domain';
 // Conteúdos meramente ilustrativos: não representam comunicados ou eventos oficiais.
 export const demoArtists: Artist[] = [
   {
-    id: 'demo-artista-1', slug: 'mr-bow', display_name: 'Mr Bow',
+    id: 'demo-artista-1', slug: 'mr-bow', display_name: 'Mr. Bow',
     tagline: 'A música aproxima-nos. Descobre novidades, bastidores e comunidade.',
     avatar_url: null, banner_url: null, accent_color: '#F1AC42', is_verified: false,
   },
