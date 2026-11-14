@@ -11,7 +11,8 @@ jobs:
     params:
       prod: false
     hooks:
-      after_checkout:
-        - name: Associar projecto Expo ruco222/ruco
-          run: |
-            npx --yes eas-cli@latest init --account ruco222 --non-interactive
+      # O Expo CLI precisa das dependencias (expo-router) para ler app.json.
+      # Este hook corre APOS a instalacao automatica de node_modules.
+      after_install_node_modules:
+        - name: Associar projecto Expo existente
+          run: npx --yes eas-cli@latest init --account ruco222 --non-interactive
