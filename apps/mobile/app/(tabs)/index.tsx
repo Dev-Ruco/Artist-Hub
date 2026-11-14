@@ -42,7 +42,7 @@ export default function HomeScreen() {
   const { session } = useAuth();
   const { posts, loading, error } = useArtistContent(selected?.id);
   const { width } = useWindowDimensions();
-  const scroll = useRef<ScrollView>(null);
+  const scroll = useRef<React.ComponentRef<typeof ScrollView>>(null);
   const newsTop = useRef(0);
   const firstName = typeof session?.user.user_metadata?.full_name === 'string'
     ? session.user.user_metadata.full_name.trim().split(/\s+/)[0] : '';
