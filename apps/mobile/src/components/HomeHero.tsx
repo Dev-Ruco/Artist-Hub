@@ -26,11 +26,20 @@ export function HomeHero({ artist, greeting, onUpdates, onCommunity }: Props) {
   const sectionHeight = desktop ? 735 : Math.min(775, Math.max(655, height - 132));
   const words = artist.display_name.toUpperCase().trim().split(/\s+/);
   const title = words.length <= 3 ? words.join('\n') : artist.display_name.toUpperCase();
-  const hasImage = Boolean(artist.banner_url?.trim());
+  // Permite imagens remotas por artista; no piloto Mr Bow usamos a fotografia original guardada no repositório.
+  // O require estático assegura que a imagem é incluída em Android, iOS e Expo Web.
+  const imageSource = artist.banner_url?.trim()
+    ? { uri: artist.banner_url.trim() }
+    : artist.slug === 'mr-bow'
+      ? require('../../assets/artists/mr-bow/hero.jpeg')
+      : null;
+  const hasImage = Boolean(imageSource);
   return <View style={[styles.hero, { height: sectionHeight, paddingHorizontal: desktop ? 52 : compact ? 22 : 27 }]}>
     <LinearGradient colors={['#795130', '#2B1E1A', '#08080B']} start={{x:1,y:0}} end={{x:0.08,y:1}}
       style={StyleSheet.absoluteFill}/>
-    {hasImage ? <Image source={{ uri: artist.banner_url! }} style={StyleSheet.absoluteFill}
+    {hasImage ? <Image source={imageSource} style={desktop
+      ? { position: 'absolute', top: 0, right: 0, width: '65%', height: '100%' }
+      : StyleSheet.absoluteFill}
       resizeMode="cover" accessibilityLabel={'Fotografia de ' + artist.display_name}/> : <>
       <View style={styles.posterRuleA}/>
       <View style={styles.posterRuleB}/>

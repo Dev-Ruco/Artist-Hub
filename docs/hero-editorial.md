@@ -25,3 +25,10 @@ Quando for recebida, podemos alojá-la num bucket de media autorizado e preenche
 
 ## Revisão antes do lançamento
 Validar o recorte da imagem em dispositivos de 320 a 430 px, iPhone, Android e desktop; confirmar contraste da tipografia, controlo de permissões de imagem e navegação por acessibilidade.
+
+## Fotografia principal incorporada — 14/11/2026
+
+- Fotografia original recebida em `apps/mobile/assets/artists/mr-bow/MR BOW SETION.jpeg`.
+- Referência optimizada para utilização em código: `apps/mobile/assets/artists/mr-bow/hero.jpeg`. Trata-se do **mesmo conteúdo binário**, sem edição, recorte permanente nem alteração do rosto ou das proporções.
+- `HomeHero` apresenta `hero.jpeg` quando o artista activo tem `slug = 'mr-bow'` e não existe `banner_url` externo; um `banner_url` explícito mantém precedência.
+- A apresentação usa `resizeMode='cover'`, com gradientes para legibilidade e enquadramento ajustado ao tamanho do ecrã. O ficheiro original permanece intacto.
