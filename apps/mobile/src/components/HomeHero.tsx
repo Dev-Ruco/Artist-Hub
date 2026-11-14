@@ -29,8 +29,8 @@ export function HomeHero({ artist, greeting, onUpdates, onCommunity }: Props) {
   const hasImage = Boolean(artist.banner_url?.trim());
   return <View style={[styles.hero, { height: sectionHeight, paddingHorizontal: desktop ? 52 : compact ? 22 : 27 }]}>
     <LinearGradient colors={['#795130', '#2B1E1A', '#08080B']} start={{x:1,y:0}} end={{x:0.08,y:1}}
-      style={StyleSheet.absoluteFillObject}/>
-    {hasImage ? <Image source={{ uri: artist.banner_url! }} style={StyleSheet.absoluteFillObject}
+      style={StyleSheet.absoluteFill}/>
+    {hasImage ? <Image source={{ uri: artist.banner_url! }} style={StyleSheet.absoluteFill}
       resizeMode="cover" accessibilityLabel={'Fotografia de ' + artist.display_name}/> : <>
       <View style={styles.posterRuleA}/>
       <View style={styles.posterRuleB}/>
@@ -38,9 +38,9 @@ export function HomeHero({ artist, greeting, onUpdates, onCommunity }: Props) {
         style={[styles.monogram, {fontSize:desktop ? 390 : 244,right: desktop ? -18 : -40}]}>{initials(artist.display_name)}</Text>
     </>}
     <LinearGradient colors={['rgba(7,7,9,0.5)', 'rgba(7,7,9,0.12)', 'rgba(7,7,9,0.32)', 'rgba(7,7,9,0.97)']}
-      locations={[0,0.27,0.57,1]} style={StyleSheet.absoluteFillObject}/>
+      locations={[0,0.27,0.57,1]} style={StyleSheet.absoluteFill}/>
     <LinearGradient colors={['rgba(7,7,9,0.50)', 'rgba(7,7,9,0)']}
-      start={{x:0,y:0.5}} end={{x:1,y:0.5}} style={StyleSheet.absoluteFillObject}/>
+      start={{x:0,y:0.5}} end={{x:1,y:0.5}} style={StyleSheet.absoluteFill}/>
     <View style={styles.heroContent}>
       <View style={styles.topRow}>
         <View style={{ flex: 1, gap: 5 }}>
