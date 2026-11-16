@@ -1,0 +1,35 @@
+spring:
+  application:
+    name: plataforma-mr-bow
+  threads:
+    virtual:
+      enabled: true
+
+server:
+  port: ${PORTA_API:8080}
+  forward-headers-strategy: framework
+  error:
+    include-message: never
+    include-stacktrace: never
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: never
+
+plataforma:
+  supabase:
+    endereco: ${SUPABASE_ENDERECO:https://supabase.datacenterhub.tech}
+    chave-anonima: ${SUPABASE_CHAVE_ANONIMA:}
+    esquema: mrbowapp
+    codigo-artista: mr-bow
+  seguranca:
+    origens-permitidas: ${ORIGENS_PERMITIDAS:http://localhost:8081,http://localhost:19006}
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
