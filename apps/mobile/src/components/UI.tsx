@@ -1,8 +1,7 @@
 import React from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View, type ViewStyle } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View, type ViewStyle } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { useArtist } from '../context/ArtistContext';
 import { isDemoMode } from '../lib/supabase';
 import type { Artist, ArtistEvent, Post } from '../types/domain';
 import { palette, radius } from '../theme/tokens';
@@ -40,21 +39,6 @@ export function DemoFlag() {
   if (!isDemoMode) return null;
   return <View style={styles.demoFlag}><Ionicons name="flask-outline" color={palette.warning} size={14}/>
     <Text style={{ color: palette.warning, fontSize: 11, fontWeight: '700', letterSpacing: 1 }}>DADOS FICTÍCIOS · DEMONSTRAÇÃO</Text></View>;
-}
-export function ArtistSwitcher() {
-  const { artists, selected, selectArtist, loading, error } = useArtist();
-  if (loading) return <ActivityIndicator color={palette.accent} />;
-  if (error) return <Text style={{ color: palette.danger }}>{error}</Text>;
-  if (!artists.length) return <EmptyState title="Sem artistas" detail="Registe e active um artista na base de dados." />;
-  return <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 9, paddingBottom: 8 }}>
-    {artists.map(artist => <Pressable key={artist.id} onPress={() => selectArtist(artist.id)}
-      accessibilityRole="button"
-      style={[styles.artistChip, selected?.id === artist.id && { borderColor: artist.accent_color, backgroundColor: '#21292A' }]}>
-      <View style={[styles.artistDot, { backgroundColor: artist.accent_color }]}/>
-      <Text numberOfLines={1} style={styles.chipText}>{artist.display_name}</Text>
-      {artist.is_verified ? <Ionicons name="checkmark-circle" color={artist.accent_color} size={14}/> : null}
-    </Pressable>)}
-  </ScrollView>;
 }
 export function ArtistHero({ artist }: { artist: Artist }) {
   return <View style={[styles.hero, { borderColor: artist.accent_color + '44' }]}>
