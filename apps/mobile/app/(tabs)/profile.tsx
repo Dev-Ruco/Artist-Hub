@@ -107,7 +107,7 @@ export default function ProfileScreen() {
     try {
       if (apiConfigurada) {
         await pedirApi('/perfil', {
-          metodo: 'PATCH', token: session?.access_token, corpo: { nome },
+          metodo: 'PATCH', token: session?.access_token, corpo: { nome: name },
         });
         await actualizarNome(name);
         setMessage('Perfil actualizado com sucesso.');
@@ -117,6 +117,7 @@ export default function ProfileScreen() {
         .upsert({ user_id: userId, display_name: name }, { onConflict: 'user_id' });
       if (error) throw error;
       // Mantém a saudação do hero sincronizada com o perfil do fã.
+      if (!supabase) throw new Error('Autenticação indisponível.');
       const { error: authError } = await supabase.auth.updateUser({ data: { full_name: name } });
       setMessage(authError
         ? 'Nome guardado no perfil. A saudação será actualizada no próximo acesso.'
