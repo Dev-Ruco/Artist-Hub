@@ -76,7 +76,23 @@ export default function CallBookingScreen() {
   const chosen = useMemo(() =>
     services.find(s => s.id === selectedServiceId && s.kind === kind) || forKind[0] || null,
   [services, selectedServiceId, forKind, kind]);
-  const activeSlot = slots.find(s => s.slot_id === slotId);
+  const visibleSlots = chosen && chosen.id === selectedServiceId ? slots : [];
+  const activeSlot = visibleSlots.find(s => s.slot_id === slotId);
+
+  // A lista abre no tipo de chamada real configurado. Nunca mostramos
+  // horarios de um servico de audio ao seleccionar uma chamada de video.
+  useEffect(() => {
+    if (!services.length) return;
+    const options = services.filter(service => service.kind === kind);
+    if (!options.length) {
+      setKind(services[0].kind);
+      selectService(services[0].id);
+      return;
+    }
+    if (!options.some(service => service.id === selectedServiceId)) {
+      selectService(options[0].id);
+    }
+  }, [services, kind, selectedServiceId, selectService]);
 
   useEffect(() => {
     setSlotId(null);
