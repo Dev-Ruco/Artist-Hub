@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import type { Session } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
+import { BRAND_ARTIST_SLUG } from '../config/brand';
 
 type AuthContextValue = {
   session: Session | null;
@@ -41,7 +42,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const { error } = await supabase.auth.signUp({
         email,
         password,
-        options: { data: { full_name: displayName.trim() } },
+        options: { data: { full_name: displayName.trim(), artist_app: BRAND_ARTIST_SLUG } },
       });
       return error?.message || null;
     },

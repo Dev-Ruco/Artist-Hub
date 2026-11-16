@@ -13,6 +13,13 @@ as $$
 declare
   fan_name text;
 begin
+  -- A instancia Auth e partilhada entre varias aplicacoes.
+  -- Nunca criar perfis de Mr. Bow para utilizadores de outros projectos.
+  -- O sinal de origem serve apenas para criacao do perfil, NAO autoriza permissoes.
+  if coalesce(new.raw_user_meta_data->>'artist_app', '') <> 'mr-bow' then
+    return new;
+  end if;
+
   fan_name := left(trim(coalesce(new.raw_user_meta_data->>'full_name', '')), 80);
   if char_length(fan_name) < 1 then
     fan_name := 'Fã';
