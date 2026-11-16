@@ -104,6 +104,20 @@ export default function ArtistScreen() {
       <Text style={styles.description}>Envia uma pergunta à equipa de Mr. Bow e acompanha o pedido. O envio gratuito não garante uma resposta pessoal do artista.</Text>
     </View>
     <DemoFlag />
+    <Pressable accessibilityRole="button" accessibilityLabel="Conhecer as chamadas privadas de áudio e vídeo"
+      onPress={() => router.push('/calls')}
+      style={({ pressed }) => [styles.callExperience, pressed && { opacity: 0.76 }]}>
+      <View style={styles.callIcon}>
+        <Ionicons name="videocam-outline" size={29} color={palette.accent}/>
+      </View>
+      <View style={{ flex: 1, gap: 6 }}>
+        <Text style={styles.callEyebrow}>EXPERIÊNCIA PRIVADA</Text>
+        <Text style={styles.callTitle}>Áudio ou vídeo com Mr. Bow</Text>
+        <Text style={styles.callText}>Descobre como funcionarão as sessões individuais, com marcação e pagamento seguro.</Text>
+        <Text style={styles.callStatus}>AGENDA EM PREPARAÇÃO</Text>
+      </View>
+      <Ionicons name="arrow-forward" size={20} color={palette.accent}/>
+    </Pressable>
     <View style={styles.questionCard}>
       <View style={styles.cardTop}>
         <View style={styles.icon}><Ionicons name="chatbubble-ellipses-outline"
@@ -170,7 +184,7 @@ export default function ArtistScreen() {
       <Ionicons name="diamond-outline" size={26} color={palette.violet}/>
       <View style={{ flex: 1, gap: 7 }}>
         <Text style={styles.cardTitle}>Experiências VIP</Text>
-        <Text style={styles.description}>Conteúdos especiais, mensagens privadas e experiências exclusivas estão previstos para uma fase posterior. Nenhum pagamento está activo.</Text>
+        <Text style={styles.description}>As experiências pagas de áudio e vídeo têm agora um ecrã de apresentação e estrutura de reservas, mas não estão abertas para pagamento ou realização de chamadas.</Text>
         <Text style={styles.vipTag}>EM DESENVOLVIMENTO</Text>
       </View>
     </View>
@@ -178,6 +192,14 @@ export default function ArtistScreen() {
 }
 
 const styles = StyleSheet.create({
+  callExperience: { flexDirection: 'row', alignItems: 'flex-start', gap: 12,
+    backgroundColor: '#272018', borderWidth: 1, borderColor: '#675039',
+    borderRadius: 24, padding: 18 },
+  callIcon: { borderRadius: 16, backgroundColor: '#40311E', padding: 12 },
+  callEyebrow: { color: palette.accent, fontSize: 9, letterSpacing: 1.5, fontWeight: '900' },
+  callTitle: { color: palette.text, fontSize: 19, fontWeight: '900', lineHeight: 24 },
+  callText: { color: palette.muted, fontSize: 12, lineHeight: 19 },
+  callStatus: { color: palette.accent, fontSize: 10, letterSpacing: 1, fontWeight: '800', marginTop: 4 },
   intro: { gap: 9 },
   title: { color: palette.text, fontSize: 33, fontWeight: '900', letterSpacing: -1 },
   description: { color: palette.muted, fontSize: 13, lineHeight: 21 },
