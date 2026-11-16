@@ -11,6 +11,7 @@ import { useArtist } from '../../src/context/ArtistContext';
 import { useAuth } from '../../src/context/AuthContext';
 import { useArtistContent } from '../../src/hooks/useArtistContent';
 import { db, isDemoMode } from '../../src/lib/supabase';
+import { apiConfigurada, pedirApi } from '../../src/lib/api';
 import { palette } from '../../src/theme/tokens';
 import type { Post } from '../../src/types/domain';
 
@@ -37,6 +38,22 @@ export default function CommunityScreen() {
   const refreshMembership = useCallback(async () => {
     if (!userId || !artistId || isDemoMode) { setMembership(null); return; }
     setChecking(true);
+    if (apiConfigurada) {
+      try {
+        const resposta = await pedirApi<{
+          aderiu: boolean; adesao?: { nivel: string; dataAdesao: string };
+        }>('/comunidade/adesao', { token: session?.access_token });
+        setMembership(resposta.aderiu && resposta.adesao
+          ? { level: resposta.adesao.nivel, joined_at: resposta.adesao.dataAdesao }
+          : null);
+        setMessage('');
+      } catch {
+        setMessage('Não foi possível verificar a tua adesão.');
+      } finally {
+        setChecking(false);
+      }
+      return;
+    }
     const { data, error: queryError } = await db().from('artist_memberships')
       .select('level,joined_at').eq('user_id', userId).eq('artist_id', artistId).maybeSingle();
     if (queryError) {
@@ -45,7 +62,7 @@ export default function CommunityScreen() {
       setMembership(data as { level: string; joined_at: string } | null);
     }
     setChecking(false);
-  }, [userId, artistId]);
+  }, [userId, artistId, session?.access_token]);
 
   useEffect(() => { void refreshMembership(); }, [refreshMembership]);
 
@@ -56,6 +73,14 @@ export default function CommunityScreen() {
     if (!artistId || joining || membership) return;
     setJoining(true);
     try {
+      if (apiConfigurada) {
+        await pedirApi('/comunidade/adesao', {
+          metodo: 'POST', token: session.access_token,
+        });
+        await refreshMembership();
+        setMessage('Adesão registada. Bem-vindo à comunidade de Mr. Bow!');
+        return;
+      }
       const { error: joinError } = await db().from('artist_memberships')
         .upsert({ artist_id: artistId, user_id: session.user.id, level: 'fan', points: 0 },
           { onConflict: 'artist_id,user_id', ignoreDuplicates: true });
