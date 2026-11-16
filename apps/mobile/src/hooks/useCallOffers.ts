@@ -1,8 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { db, isDemoMode } from '../lib/supabase';
+import { apiConfigurada, pedirApi } from '../lib/api';
+import { useAuth } from '../context/AuthContext';
 import type { AvailableCallSlot, CallService, FanCallBooking } from '../types/calls';
 
 export function useCallOffers(artistId: string | undefined, userId: string | undefined) {
+  const { session } = useAuth();
   const [services, setServices] = useState<CallService[]>([]);
   const [selectedServiceId, setSelectedServiceId] = useState<string | null>(null);
   const [slots, setSlots] = useState<AvailableCallSlot[]>([]);
@@ -26,6 +29,23 @@ export function useCallOffers(artistId: string | undefined, userId: string | und
     }
     setLoading(true);
     try {
+      if (apiConfigurada) {
+        const dados = await pedirApi<Array<{
+          identificador: string; tipo: CallService['kind']; titulo: string;
+          descricao: string; duracaoMinutos: number; precoCentimos: number; moeda: string;
+        }>>('/chamadas/servicos');
+        if (sequence !== serviceRequest.current) return;
+        const linhas: CallService[] = dados.map(item => ({
+          id: item.identificador, artist_id: artistId, kind: item.tipo,
+          title: item.titulo, description: item.descricao,
+          duration_minutes: item.duracaoMinutos, price_minor: item.precoCentimos,
+          currency: item.moeda,
+        }));
+        setServices(linhas);
+        setSelectedServiceId(current => linhas.some(item => item.id === current)
+          ? current : linhas[0]?.id || null);
+        return;
+      }
       const { data, error: queryError } = await db().from('call_services')
         .select('id,artist_id,kind,title,description,duration_minutes,price_minor,currency')
         .eq('artist_id', artistId).eq('status', 'active')
@@ -52,6 +72,12 @@ export function useCallOffers(artistId: string | undefined, userId: string | und
     }
     setLoadingSlots(true);
     try {
+      if (apiConfigurada) {
+        const horarios = await pedirApi<AvailableCallSlot[]>(
+          '/chamadas/horarios?servico=' + encodeURIComponent(selectedServiceId));
+        if (sequence === slotRequest.current) setSlots(horarios);
+        return;
+      }
       const { data, error: queryError } = await db().rpc('list_available_call_slots', {
         p_artist_id: artistId,
         p_service_id: selectedServiceId,
@@ -75,6 +101,12 @@ export function useCallOffers(artistId: string | undefined, userId: string | und
     }
     setLoadingBookings(true);
     try {
+      if (apiConfigurada) {
+        const reservas = await pedirApi<FanCallBooking[]>(
+          '/chamadas/minhas-reservas', { token: session?.access_token });
+        if (sequence === bookingRequest.current) setBookings(reservas);
+        return;
+      }
       const { data, error: queryError } = await db().rpc('list_my_call_bookings', {
         p_artist_id: artistId,
       });
@@ -86,7 +118,7 @@ export function useCallOffers(artistId: string | undefined, userId: string | und
     } finally {
       if (sequence === bookingRequest.current) setLoadingBookings(false);
     }
-  }, [artistId, userId]);
+  }, [artistId, userId, session?.access_token]);
 
   useEffect(() => { void loadServices(); }, [loadServices]);
   useEffect(() => { void loadSlots(); }, [loadSlots]);
