@@ -1,0 +1,69 @@
+name: Supabase SQL — Validacao isolada mrbowapp
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'infra/supabase/**'
+      - '.github/workflows/sql-schema-check.yml'
+  workflow_dispatch:
+
+jobs:
+  install_mrbowapp:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 6
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: 5432
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGDATABASE: postgres
+    steps:
+      - uses: actions/checkout@v4
+      - name: Preparar PostgreSQL descartavel (simulacao minima do Supabase)
+        run: |
+          if ! command -v psql >/dev/null; then
+            sudo apt-get update -qq
+            sudo apt-get install -y postgresql-client
+          fi
+          psql -v ON_ERROR_STOP=1 <<'SQL'
+          CREATE ROLE anon NOLOGIN;
+          CREATE ROLE authenticated NOLOGIN;
+          CREATE ROLE service_role NOLOGIN;
+          CREATE SCHEMA auth;
+          CREATE TABLE auth.users (
+            id uuid primary key default gen_random_uuid(),
+            raw_user_meta_data jsonb
+          );
+          CREATE FUNCTION auth.uid() RETURNS uuid
+          LANGUAGE sql STABLE AS $auth$
+            SELECT null::uuid
+          $auth$;
+          CREATE SCHEMA mrbowapp;
+          SQL
+      - name: Executar o instalador exactamente como sera usado no SQL Editor
+        run: psql -v ON_ERROR_STOP=1 -f infra/supabase/install_mrbowapp_existing_schema.sql
+      - name: Verificar 18 tabelas, RLS, artista e vendas bloqueadas
+        run: |
+          test "$(psql -Atc "select count(*) from pg_catalog.pg_tables where schemaname='mrbowapp'")" = "18"
+          test "$(psql -Atc "select count(*) from pg_catalog.pg_tables where schemaname='mrbowapp' and rowsecurity")" = "18"
+          test "$(psql -Atc "select count(*) from mrbowapp.artists where slug='mr-bow'")" = "1"
+          test "$(psql -Atc "select count(*) from mrbowapp.call_sales_settings where sales_enabled or payment_backend_ready")" = "0"
+      - name: Verificar que instalador nao executa novamente
+        run: |
+          if psql -v ON_ERROR_STOP=1 -f infra/supabase/install_mrbowapp_existing_schema.sql > /tmp/second_attempt.log 2>&1; then
+            echo "Erro: uma segunda execucao nao foi bloqueada"
+            exit 1
+          fi
+          echo "Segunda execucao bloqueada, como esperado"
