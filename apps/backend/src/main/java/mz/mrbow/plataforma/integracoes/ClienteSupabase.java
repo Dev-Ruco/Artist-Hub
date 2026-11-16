@@ -99,6 +99,13 @@ public class ClienteSupabase {
         return resposta == null ? Map.of() : resposta;
     }
 
+    /** Invalida a sessão no Supabase Auth, sem aceder aos segredos JWT. */
+    public void terminarSessao(String token) {
+        cliente.post().uri("/auth/v1/logout")
+            .headers(cabecalhos -> cabecalhos.setBearerAuth(token))
+            .retrieve().toBodilessEntity();
+    }
+
     private String credencial(String token) {
         return token == null || token.isBlank() ? configuracao.chaveAnonima() : token;
     }

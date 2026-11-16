@@ -32,7 +32,7 @@ public class ControladorPerguntas {
   @GetMapping @Operation(summary="Listar apenas perguntas do utilizador autenticado")
   public List<Map<String,Object>> listar(@AuthenticationPrincipal FaAutenticado fa) {
     return cliente.consultar("message_requests",Map.of(
-      "select","identificador:id,texto:body,estado:status,dataCriacao:created_at",
+      "select","identificador:id,texto:body,estado:status,tipo:request_type,dataCriacao:created_at,respostaEm:replied_at",
       "artist_id","eq."+artistas.identificadorArtista(),
       "fan_id","eq."+fa.identificador(),
       "order","created_at.desc","limit","40"),fa.token());

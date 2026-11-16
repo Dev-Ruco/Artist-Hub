@@ -7,6 +7,8 @@ import java.util.Map;
 import java.util.UUID;
 import mz.mrbow.plataforma.artistas.ServicoArtistas;
 import mz.mrbow.plataforma.integracoes.ClienteSupabase;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import mz.mrbow.plataforma.seguranca.FaAutenticado;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -33,5 +35,10 @@ public class ControladorChamadas {
     return cliente.executarFuncao("list_available_call_slots",Map.of(
       "p_artist_id",artistas.identificadorArtista().toString(),
       "p_service_id",servico.toString()),null);
+  }
+  @GetMapping("/minhas-reservas") @Operation(summary="Consultar reservas pessoais")
+  public List<Map<String,Object>> minhasReservas(@AuthenticationPrincipal FaAutenticado fa) {
+    return cliente.executarFuncao("list_my_call_bookings",
+      Map.of("p_artist_id",artistas.identificadorArtista().toString()),fa.token());
   }
 }

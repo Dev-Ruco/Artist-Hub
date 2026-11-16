@@ -10,6 +10,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import mz.mrbow.plataforma.configuracao.ConfiguracaoSupabase;
 import mz.mrbow.plataforma.integracoes.ClienteSupabase;
+import mz.mrbow.plataforma.seguranca.FaAutenticado;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -94,6 +96,12 @@ public class ControladorContas {
       if(erro.getStatusCode().is5xxServerError()) throw erro;
     }
     return Map.of("mensagem","Se o endereço estiver registado, receberás instruções por correio electrónico.");
+  }
+
+  @PostMapping("/sair") @ResponseStatus(HttpStatus.NO_CONTENT)
+  @Operation(summary="Terminar sessão e invalidar token de renovação")
+  public void sair(@AuthenticationPrincipal FaAutenticado fa) {
+    cliente.terminarSessao(fa.token());
   }
 
   private Map<String,Object> formatarSessao(Map<String,Object> original) {

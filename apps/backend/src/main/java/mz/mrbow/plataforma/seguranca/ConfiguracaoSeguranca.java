@@ -30,7 +30,9 @@ public class ConfiguracaoSeguranca {
                 .requestMatchers(HttpMethod.GET, "/api/v1/artista",
                     "/api/v1/publicacoes", "/api/v1/eventos",
                     "/api/v1/chamadas/servicos", "/api/v1/chamadas/horarios").permitAll()
-                .requestMatchers(HttpMethod.POST, "/api/v1/contas/**").permitAll()
+                .requestMatchers(HttpMethod.POST,
+                    "/api/v1/contas/entrar", "/api/v1/contas/registar",
+                    "/api/v1/contas/renovar", "/api/v1/contas/recuperar").permitAll()
                 .anyRequest().authenticated())
             .exceptionHandling(erros -> erros.authenticationEntryPoint(
                 (pedido, resposta, excecao) -> {
