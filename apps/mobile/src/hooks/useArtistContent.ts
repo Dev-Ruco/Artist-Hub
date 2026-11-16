@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { demoEvents, demoPosts } from '../data/demo';
 import { db, isDemoMode } from '../lib/supabase';
 import type { ArtistEvent, Post } from '../types/domain';
@@ -8,9 +8,11 @@ export function useArtistContent(artistId: string | undefined) {
   const [events, setEvents] = useState<ArtistEvent[]>([]);
   const [loading, setLoading] = useState(!isDemoMode);
   const [error, setError] = useState<string | null>(null);
+  const requestNumber = useRef(0);
 
   const refresh = useCallback(async () => {
-    if (!artistId) { setPosts([]); setEvents([]); return; }
+    const request = ++requestNumber.current;
+    if (!artistId) { setPosts([]); setEvents([]); setError(null); setLoading(false); return; }
     if (isDemoMode) {
       setPosts(demoPosts.filter(p => p.artist_id === artistId));
       setEvents(demoEvents.filter(e => e.artist_id === artistId));
@@ -27,6 +29,7 @@ export function useArtistContent(artistId: string | undefined) {
         .gte('starts_at', new Date().toISOString())
         .order('starts_at', { ascending: true }).limit(30),
     ]);
+    if (request !== requestNumber.current) return;
     setError(postResult.error?.message || eventResult.error?.message || null);
     setPosts((postResult.data || []) as Post[]);
     setEvents((eventResult.data || []) as ArtistEvent[]);
