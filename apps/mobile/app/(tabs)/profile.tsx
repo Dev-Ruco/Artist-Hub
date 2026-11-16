@@ -9,6 +9,7 @@ import { useAuth } from '../../src/context/AuthContext';
 import { useArtist } from '../../src/context/ArtistContext';
 import { db, isDemoMode, supabase } from '../../src/lib/supabase';
 import { palette } from '../../src/theme/tokens';
+import { BackendConnectionCard } from '../../src/components/BackendConnectionCard';
 
 type Membership = { level: string; joined_at: string };
 const membershipTitle = (level: string) => {
@@ -115,6 +116,7 @@ export default function ProfileScreen() {
         label="Entrar ou criar conta" onPress={() => router.push('/(auth)/login')}/>
     </View>
     <Text style={styles.note}>As publicações públicas continuam disponíveis sem registo.</Text>
+    <BackendConnectionCard/>
   </Screen>;
 
   return <Screen>
@@ -179,6 +181,7 @@ export default function ProfileScreen() {
       <ActionButton variant="secondary" label="Terminar sessão" onPress={requestSignOut}/>
     </View>
     <Text style={styles.note}>O chat privado, as compras e os serviços VIP ainda não estão activos.</Text>
+    <BackendConnectionCard/>
   </Screen>;
 }
 

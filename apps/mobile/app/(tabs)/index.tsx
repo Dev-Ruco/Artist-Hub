@@ -39,7 +39,7 @@ function NewsPreview({ post, onOpen }: { post: Post; onOpen: () => void }) {
 }
 
 export default function HomeScreen() {
-  const { selected } = useArtist();
+  const { selected, loading: artistLoading, error: artistError, refresh: reloadArtist } = useArtist();
   const { session } = useAuth();
   const { posts, loading, error } = useArtistContent(selected?.id);
   const { width } = useWindowDimensions();
@@ -60,7 +60,15 @@ export default function HomeScreen() {
           onUpdates={() => scroll.current?.scrollTo({ y: newsTop.current, animated: true })}
           onCommunity={() => router.push('/(tabs)/community')}
         /> : <View style={{ paddingHorizontal: 22, paddingVertical: 40 }}>
-          <EmptyState title="Comunidade indisponível" detail={"Não foi possível carregar a comunidade de " + BRAND_ARTIST_NAME + "."}/>
+          {artistLoading ? <ActivityIndicator color={palette.accent}/> :
+            <EmptyState title="Comunidade indisponível" detail={artistError
+              ? "Não foi possível aceder à base de dados. Confirma a ligação no separador Perfil."
+              : "Não foi possível carregar a comunidade de " + BRAND_ARTIST_NAME + "."}/>}
+          {!artistLoading ? <Pressable accessibilityRole="button" onPress={() => void reloadArtist()}
+            style={{ alignSelf: 'center', marginTop: 15, padding: 12, backgroundColor: palette.surface,
+              borderRadius: 14, borderWidth: 1, borderColor: palette.line }}>
+            <Text style={{ color: palette.accent, fontWeight: '800' }}>Tentar novamente</Text>
+          </Pressable> : null}
         </View>}
         <View onLayout={event => { newsTop.current = event.nativeEvent.layout.y; }}
           style={{ paddingHorizontal: desktop ? 52 : 22, paddingTop: 43, gap: 20,

@@ -1,4 +1,4 @@
-name: Artist Hub — pre-visualizacao Web
+name: Mr. Bow — pre-visualizacao Web
 on:
   push:
     branches: ['main']
