@@ -1,10 +1,10 @@
 -- Artist Hub / migracao 0002
 -- Criar um perfil inicial quando um utilizador se regista pelo Supabase Auth.
--- Executar depois de 0001_artist_hub.sql, primeiro num ambiente de testes.
+-- Executar depois de 0001_mrbowapp.sql, primeiro num ambiente de testes.
 -- A funcao de perfil nao confere qualquer beneficio VIP nem privilegio de staff.
 begin;
 
-create or replace function artist_hub.create_fan_profile()
+create or replace function mrbowapp.create_fan_profile()
 returns trigger
 language plpgsql
 security definer
@@ -25,18 +25,18 @@ begin
     fan_name := 'Fã';
   end if;
 
-  insert into artist_hub.profiles (user_id, display_name)
+  insert into mrbowapp.profiles (user_id, display_name)
   values (new.id, fan_name)
   on conflict (user_id) do nothing;
 
   return new;
 end;
 $$;
-revoke all on function artist_hub.create_fan_profile() from public;
+revoke all on function mrbowapp.create_fan_profile() from public;
 
-drop trigger if exists on_auth_user_created_artist_hub on auth.users;
-create trigger on_auth_user_created_artist_hub
+drop trigger if exists on_auth_user_created_mrbowapp on auth.users;
+create trigger on_auth_user_created_mrbowapp
   after insert on auth.users
-  for each row execute function artist_hub.create_fan_profile();
+  for each row execute function mrbowapp.create_fan_profile();
 
 commit;

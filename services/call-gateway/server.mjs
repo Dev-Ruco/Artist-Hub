@@ -113,7 +113,7 @@ const server = createServer(async (req, res) => {
     // A funcao SQL so devolve uma sessao com pagamento confirmado, dentro
     // da janela marcada e para o fa titular ou staff autorizado.
     // Um token LiveKit nunca e emitido com base apenas no booking_id.
-    const { data, error } = await supabaseAdmin.schema('artist_hub')
+    const { data, error } = await supabaseAdmin.schema('mrbowapp')
       .rpc('authorize_call_participant', {
         p_booking_id: bookingId,
         p_user_id: auth.user.id,

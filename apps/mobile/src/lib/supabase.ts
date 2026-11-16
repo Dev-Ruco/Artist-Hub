@@ -26,8 +26,8 @@ if (supabase && Platform.OS !== 'web') {
   });
 }
 
-// Todas as consultas do MVP utilizam o esquema isolado artist_hub.
+// Todas as consultas do MVP utilizam o esquema isolado mrbowapp.
 export function db() {
   if (!supabase) throw new Error('Configure o Supabase no ficheiro .env.');
-  return supabase.schema('artist_hub');
+  return supabase.schema('mrbowapp');
 }
