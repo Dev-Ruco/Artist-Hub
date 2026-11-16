@@ -2,6 +2,19 @@
 
 Aplicação móvel Android/iOS **de Mr. Bow**, construída com React Native, Expo Router e Supabase. Esta distribuição contém apenas a comunidade de Mr. Bow; a base técnica poderá ser reutilizada futuramente para criar aplicações separadas para outros artistas. Sem selector público de artistas.
 
+## Arquitectura profissional — Java + API REST
+
+A solução inclui agora um **backend autónomo** em `apps/backend` com **Java 21 e Spring Boot 4.1.2**. É um monólito modular, com nomes de classes, métodos, variáveis e contratos de resposta em **português**. A aplicação React Native utiliza `EXPO_PUBLIC_API_URL` para comunicar com a API Java por HTTPS, sem conhecer directamente as tabelas da base de dados.
+
+- **Backend Java:** [abrir código](apps/backend) · [manual](apps/backend/README.md)
+- **Arquitectura para explicar num portefólio:** [ver arquitectura](docs/arquitectura-api-java.md)
+- **Publicar o backend no Coolify:** [instruções](docs/publicar-api-java-coolify.md)
+- **Documentação interactiva:** `/swagger-ui.html` depois da publicação.
+
+O esquema PostgreSQL `mrbowapp` com 18 tabelas mantém-se intacto. Nesta primeira fase, o backend utiliza um **adaptador PostgREST** (API segura da própria instalação Supabase, que aplica RLS) em vez de credenciais PostgreSQL privilegiadas. A API Java é independente deste adaptador.
+
+**Estado:** o código compila e tem testes automatizados; a API Java ainda **não foi publicada** nem testada contra a instalação real. O modo antigo da aplicação mantém-se disponível enquanto não se configurar `EXPO_PUBLIC_API_URL`. Pagamentos e chamadas reais continuam desactivados.
+
 ## Conteúdo
 
 ```text
