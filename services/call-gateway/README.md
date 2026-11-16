@@ -24,10 +24,10 @@ Serviço **Node.js 22+ separado da aplicação móvel**. O projecto não contém
 
 **Este gateway não cobra nem confirma pagamentos.** Não existe endpoint genérico de webhook porque cada fornecedor (M-Pesa, e-Mola, loja Apple/Google, cartão) exige validações próprias. Quando o fornecedor for escolhido, o backend deverá:
 
-1. Criar ou obter uma reserva via `artist_hub.request_call_booking` com JWT do fã.
+1. Criar ou obter uma reserva via `mrbowapp.request_call_booking` com JWT do fã.
 2. Criar a intenção de pagamento no fornecedor, validando montante, moeda e prazo.
 3. Confirmar a assinatura e o estado do pagamento através de webhook do fornecedor, evitando repetições.
-4. Chamar `artist_hub.confirm_call_booking_payment` usando apenas `service_role`.
+4. Chamar `mrbowapp.confirm_call_booking_payment` usando apenas `service_role`.
 5. Emitir o token de chamada com a API acima durante a janela autorizada.
 
 A aplicação mantém a reserva e cobrança **desactivadas** até este percurso estar concluído.

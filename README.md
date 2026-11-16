@@ -41,9 +41,12 @@ Use o ambiente de desenvolvimento Expo/QR de acordo com a versão instalada no d
 
 ## Ligar Supabase real
 
-1. Execute a migração `infra/supabase/migrations/0001_artist_hub.sql` numa base de testes.
-2. Active o esquema `artist_hub` na configuração dos esquemas expostos pela API PostgREST. No self-hosted, depende da configuração do deployment.
-3. Execute `infra/supabase/seed_pilot.sql` em desenvolvimento (opcional).
+**No Supabase self-hosted já existe o esquema vazio `mrbowapp`.** Para o instalar pela primeira vez, utilizar [o instalador adaptado](infra/supabase/install_mrbowapp_existing_schema.sql), depois de fazer backup. Não executar o instalador antigo. Seguir [as instruções de instalação](docs/instalacao-supabase-self-hosted-mr-bow.md).
+
+
+1. Se a instância tiver o esquema `mrbowapp` vazio, executar apenas `infra/supabase/install_mrbowapp_existing_schema.sql` (que agrega as três migrações numa transacção).
+2. Acrescentar `mrbowapp` a `PGRST_DB_SCHEMAS` no serviço REST/PostgREST, preservando todos os esquemas existentes.
+3. O instalador cria o registo `Mr. Bow`; não executar `seed_pilot.sql` em produção.
 4. Copie `apps/mobile/.env.example` para `apps/mobile/.env` e substitua o URL e a chave publicável. **Não use service_role.**
 5. Reinicie o Expo com `npm run start` e verifique os ecrãs e as consultas. Em ambiente real, a autenticação exige serviço de email/confirmacão correctamente configurado.
 

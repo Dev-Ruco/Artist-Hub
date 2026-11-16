@@ -6,7 +6,7 @@ O produto continua a ser uma aplicação nativa exclusiva de Mr. Bow. Implement�
 
 ### Código já existente
 - `apps/mobile/app/calls/index.tsx`: escolha de áudio/vídeo, serviços, duração, preços apenas quando existirem na base de dados, horários, selecção visual e histórico pessoal.
-- `apps/mobile/src/hooks/useCallOffers.ts`: consulta de serviços e RPCs de horários/reservas no esquema `artist_hub`.
+- `apps/mobile/src/hooks/useCallOffers.ts`: consulta de serviços e RPCs de horários/reservas no esquema `mrbowapp`.
 - `infra/supabase/migrations/0003_private_calls.sql`: cinco tabelas e RPCs para gerir serviços, disponibilidade, bloqueios de pagamento, reservas atómicas e autorização de participação.
 - `services/call-gateway`: serviço Node separado da aplicação, com validação do JWT Supabase e geração de token temporário LiveKit para reservas confirmadas.
 - `services/call-gateway/Dockerfile`: contentor para implantação futura num servidor separado.

@@ -13,7 +13,7 @@ Android / iOS — aplicação piloto React Native
 Supabase Auth --------- identidade global do fã
   |
   v
-PostgREST / Realtime (schema artist_hub, RLS)
+PostgREST / Realtime (schema mrbowapp, RLS)
   |          |              |               |
   v          v              v               v
 artists   posts/events   memberships    message_requests
@@ -48,7 +48,7 @@ Gateway financeiro -> Webhook verificado -> entitlement -> app
 ## Modelo de autorização
 
 - O cliente usa `anon/publishable key` e JWT da sessão, nunca `service_role`.
-- O PostgREST expõe somente o esquema `artist_hub` (além dos esquemas administrativos que o Supabase exija).
+- O PostgREST expõe somente o esquema `mrbowapp` (além dos esquemas administrativos que o Supabase exija).
 - RLS controla **quem pode ler/inserir**; as aplicações nunca devem depender exclusivamente de filtros React para isolamento.
 - Operações administrativas e mudanças de estado utilizam chamadas de backend seguras, com teste explícito de staff em cada artista.
 - Níveis, pontos, confirmação de pagamentos e concessão de benefícios são campos sob controlo do servidor.
@@ -57,8 +57,8 @@ Gateway financeiro -> Webhook verificado -> entitlement -> app
 ## Supabase self-hosted — passos necessários
 
 1. Criar uma base de dados/ambiente de teste ou snapshot com possibilidade de rollback.
-2. Executar `infra/supabase/migrations/0001_artist_hub.sql` no SQL Editor com permissões adequadas.
-3. Expor `artist_hub` na configuração de `db-schemas` do PostgREST/Supabase API e reiniciar os serviços relevantes. Confirmar configuração efectiva da instalação.
+2. No Supabase self-hosted, quando o esquema `mrbowapp` já existe e está vazio, executar apenas o instalador `infra/supabase/install_mrbowapp_existing_schema.sql` no SQL Editor, depois de backup.
+3. Expor `mrbowapp` na configuração de `db-schemas` do PostgREST/Supabase API e reiniciar os serviços relevantes. Confirmar configuração efectiva da instalação.
 4. Criar/activar os utilizadores Auth. Se desejado, executar `infra/supabase/seed_pilot.sql`, **apenas em desenvolvimento**.
 5. Introduzir URL pública e chave publishable/anon na `.env` da aplicação.
 6. Confirmar que o projecto usa HTTPS válido, que emails de confirmação são entregues e que o cliente obtém JWT.
