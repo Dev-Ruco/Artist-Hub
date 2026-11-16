@@ -6,7 +6,8 @@ type AuthContextValue = {
   session: Session | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<string | null>;
-  signUp: (email: string, password: string) => Promise<string | null>;
+  signUp: (email: string, password: string, displayName: string) => Promise<string | null>;
+  resetPassword: (email: string) => Promise<string | null>;
   signOut: () => Promise<void>;
 };
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -22,7 +23,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (mounted) { setSession(data.session); setLoading(false); }
     }).catch(() => { if (mounted) setLoading(false); });
     const { data: listener } = supabase.auth.onAuthStateChange((_event, current) => {
-      if (mounted) setSession(current);
+      if (mounted) { setSession(current); setLoading(false); }
     });
     return () => { mounted = false; listener.subscription.unsubscribe(); };
   }, []);
@@ -31,16 +32,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     session,
     loading,
     async signIn(email, password) {
-      if (!supabase) return 'Modo de demonstração: configure o Supabase.';
+      if (!supabase) return 'O registo só está disponível quando o serviço de contas estiver ligado.';
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       return error?.message || null;
     },
-    async signUp(email, password) {
-      if (!supabase) return 'Modo de demonstração: configure o Supabase.';
-      const { error } = await supabase.auth.signUp({ email, password });
+    async signUp(email, password, displayName) {
+      if (!supabase) return 'O registo só está disponível quando o serviço de contas estiver ligado.';
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { data: { full_name: displayName.trim() } },
+      });
       return error?.message || null;
     },
-    async signOut() { if (supabase) await supabase.auth.signOut(); },
+    async resetPassword(email) {
+      if (!supabase) return 'A recuperação de acesso não está disponível em demonstração.';
+      const { error } = await supabase.auth.resetPasswordForEmail(email);
+      return error?.message || null;
+    },
+    async signOut() {
+      if (supabase) await supabase.auth.signOut();
+    },
   }), [session, loading]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
