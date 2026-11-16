@@ -1,93 +1,81 @@
-# Instalação de Mr. Bow no Supabase self-hosted (Coolify)
+# Mr. Bow — instalar no esquema mrbowapp do Supabase self-hosted
 
-Esta instalação é para **Supabase instalado pelo próprio utilizador**, e não para um projecto Supabase Cloud. O SQL foi preparado para o mesmo PostgreSQL que suporta os outros projectos; o novo esquema de negócio é `artist_hub`.
+O esquema foi criado no Supabase self-hosted através do Coolify, e o SQL Editor confirmou:
+```json
+{"esquema":"mrbowapp","total_tabelas":0,"tabelas_com_rls":0}
+```
 
-## Antes de executar
+**Não utilizar o instalador antigo**, que foi descontinuado. O ficheiro correcto é:
 
-1. Fazer um **backup/snapshot verificável** do PostgreSQL existente e garantir que é possível repor o backup.
-2. Abrir o Studio do **Supabase self-hosted** → **SQL Editor** (ou utilizar `psql` com role administrativa `postgres`).
-3. Executar primeiro esta verificação sem fazer alterações:
+[Instalar no esquema existente mrbowapp](../infra/supabase/install_mrbowapp_existing_schema.sql).
+
+## 1. Fazer backup e verificar o estado da base
+
+Antes de aplicar qualquer alteração à instância partilhada, confirmar que existe um backup PostgreSQL recuperável. No SQL Editor, executar a seguinte consulta, que não altera dados:
 
 ```sql
-select current_database() as base_de_dados,
+select current_database() as base,
        current_user as utilizador_sql,
-       to_regnamespace('artist_hub') is not null as esquema_ja_existe,
-       to_regclass('auth.users') is not null as autenticacao_supabase_disponivel;
+       to_regnamespace('mrbowapp') is not null as esquema_existe,
+       (select count(*) from pg_catalog.pg_tables
+        where schemaname='mrbowapp') as tabelas_existentes;
 ```
 
-Se `esquema_ja_existe = true`, **não executar o instalador inicial**. Fazer antes um inventário dos objectos existentes. O instalador tem um bloqueio que interrompe a execução se encontrar esse esquema.
+O resultado esperado antes da primeira instalação é `esquema_existe = true` e `tabelas_existentes = 0`. Se já existirem tabelas ou outros objectos, **não executar este instalador inicial**.
 
-## Instalar
+## 2. Executar no SQL Editor
 
-1. Abrir [o instalador único](../infra/supabase/install_artist_hub_initial.sql) e copiar o SQL integralmente.
-2. Colar no SQL Editor do Supabase self-hosted e executar como `postgres`. Não usar a chave pública de API para aplicar migrações.
-3. O SQL executa as migrações 0001, 0002 e 0003 numa única transacção. Caso uma falhe, o PostgreSQL cancela a transacção. Não é necessário executar as três separadamente.
-4. O instalador regista apenas o artista **Mr. Bow**, `slug='mr-bow'`, **sem** publicar notícias fictícias, configurar preços ou abrir horários.
-5. O SQL instala um trigger em `auth.users` para criar o perfil **somente** quando o registo inclui `raw_user_meta_data.artist_app = 'mr-bow'`. Não cria perfis de Mr. Bow para registos normais dos outros projectos. Esse marcador de origem não concede privilégios e não substitui RLS.
+1. Abrir [o novo instalador](../infra/supabase/install_mrbowapp_existing_schema.sql) no GitHub.
+2. Copiar **todo** o conteúdo, de `BEGIN;` até à consulta `SELECT` final.
+3. Colar no SQL Editor do Supabase self-hosted e executar com permissões administrativas.
+4. A migração é atómica: qualquer erro antes de `COMMIT` provoca rollback da transacção, desde que o script seja executado integralmente.
+5. O instalador interrompe-se se detectar objectos no esquema `mrbowapp`, para não sobrescrever dados.
 
-## Validar após a instalação
+Cria **18 tabelas** com RLS, funções de segurança e o registo do artista `Mr. Bow`. Cria ainda um trigger restrito em `auth.users`, que só introduz um perfil no `mrbowapp` quando o registo possui o marcador `artist_app = mr-bow` — não altera contas de outros projectos.
 
+O SQL não cria objectos em `public`, não activa pagamentos nem chamadas e não introduz preços ou publicações fictícias.
+
+## 3. Confirmar instalação
+
+No fim do SQL, a consulta de validação deverá indicar:
+
+| tabelas | tabelas_com_rls | artista_mr_bow | vendas_activadas |
+|---|---|---|---|
+| 18 | 18 | 1 | 0 |
+
+Podes também executar:
 ```sql
-select count(*) as total_tabelas
-from pg_catalog.pg_tables where schemaname = 'artist_hub';
-
-select schemaname, tablename, rowsecurity
-from pg_catalog.pg_tables
-where schemaname = 'artist_hub'
-order by tablename;
-
-select id, slug, display_name, status
-from artist_hub.artists where slug = 'mr-bow';
-
-select count(*) as definicoes_financeiras_activas
-from artist_hub.call_sales_settings
-where sales_enabled or payment_backend_ready;
+select tablename, rowsecurity from pg_catalog.pg_tables
+where schemaname='mrbowapp' order by tablename;
 ```
 
-Resultado esperado: **18 tabelas**, todas com `rowsecurity = true`, **um** registo de Mr. Bow e **zero** definições financeiras activas. Não activar serviços pagos enquanto o checkout e os webhooks não estiverem concluídos.
+## 4. Expor mrbowapp no serviço REST/PostgREST do Coolify
 
-## Expor o esquema na API REST do Supabase self-hosted
+Depois da instalação, no Coolify, abrir as variáveis do serviço Supabase REST/PostgREST e acrescentar `mrbowapp` à lista da variável `PGRST_DB_SCHEMAS` **sem retirar qualquer esquema actualmente utilizado por outros projectos**.
 
-No **Coolify**, localizar o serviço **Supabase REST/PostgREST** e a variável `PGRST_DB_SCHEMAS`. Adicionar `artist_hub` à lista **preservando os esquemas já existentes**, por exemplo:
+Exemplo meramente ilustrativo:
 
 ```env
-PGRST_DB_SCHEMAS=public,graphql_public,artist_hub
+PGRST_DB_SCHEMAS=public,graphql_public,mrbowapp
 ```
 
-**A linha acima é apenas um exemplo.** A instalação pode conter outros esquemas: nunca substituir uma lista existente sem os incluir. O parâmetro deverá chegar ao contentor PostgREST (normalmente o serviço `rest`); alterar apenas o Studio não é suficiente. Recriar/reiniciar **somente os serviços afectados** de forma controlada através do Coolify e testar os serviços já existentes.
+Manter os restantes valores da tua instalação. Reiniciar apenas o serviço afectado e confirmar que as restantes aplicações continuam a funcionar.
 
-A configuração `PGRST_DB_EXTRA_SEARCH_PATH` não serve para expor um esquema pela API. Não adicionar `artist_hub` ao `public` nem deslocar as tabelas para `public`.
+## 5. Ligar a aplicação React Native
 
-### Validar a API
-
-No cliente da aplicação, após configurar as variáveis de ambiente, a consulta `supabase.schema('artist_hub').from('artists')` deve devolver Mr. Bow como artista activo. A API precisa de HTTPS funcional e de uma chave **publicável/anon**, nunca de `service_role` dentro do React Native.
-
-## Variáveis necessárias na aplicação
-
-No ambiente da app React Native:
+`apps/mobile/src/lib/supabase.ts` já aponta para `supabase.schema('mrbowapp')`. Falta fornecer ao Expo o URL público da tua instalação e uma chave publicável/anon:
 
 ```env
-EXPO_PUBLIC_SUPABASE_URL=https://SEU-ENDERECO-PUBLICO-DO-SUPABASE
-EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY=SUA-CHAVE-PUBLICAVEL-OU-ANON
+EXPO_PUBLIC_SUPABASE_URL=https://SEU-SUPABASE
+EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY=SUA_CHAVE_PUBLICAVEL
 EXPO_PUBLIC_ARTIST_SLUG=mr-bow
 EXPO_PUBLIC_ARTIST_NAME=Mr. Bow
 ```
 
-Substituir os valores exemplificativos pelos da tua instalação. O URL e a chave devem corresponder ao mesmo Supabase. Não guardar senhas PostgreSQL, chaves `service_role`, JWT secret ou segredos de pagamento no projecto móvel.
+Nunca partilhar nem colocar no cliente `service_role`, password PostgreSQL, JWT secret ou credenciais de pagamentos. A chave de serviço só poderá ser usada por servidores protegidos.
 
-## O que **não** fica pronto só com a instalação SQL
+## 6. Após a instalação
 
-- O envio/recepção de emails Supabase Auth depende do SMTP self-hosted.
-- A funcionalidade de recuperar palavra-passe ainda precisa do tratamento de deep links nativos e dos testes no dispositivo.
-- Pagamentos, webhooks, chamadas e gestão de agenda só ficam operacionais depois dos respectivos serviços de backend e autorização.
-- Os testes de RLS para dois utilizadores diferentes e os testes nativos Android/iOS continuam obrigatórios.
+Testar duas contas de fãs, registo, perfis, RLS, adesão, feed e envio de perguntas. O envio de emails depende do SMTP do Supabase Auth. Reservas de chamadas e compras continuam desactivadas até haver backend financeiro verificado, preços/agenda aprovados e gateway WebRTC operacional.
 
-## Em caso de erro
-
-O instalador interrompe-se se o esquema `artist_hub` já existir. Se um comando falhar no SQL Editor, registar **a mensagem exacta do erro** sem publicar chaves, passwords, JWTs ou outros segredos, e analisar antes de tentar novamente. Não usar `DROP SCHEMA CASCADE` nem recriar todo o Supabase como tentativa de reparação.
-
-## Referências oficiais
-
-- Supabase — [Using custom schemas](https://supabase.com/docs/guides/api/using-custom-schemas)
-- Supabase — [Docker self-hosting](https://supabase.com/docs/guides/self-hosting/docker)
-- Supabase — [Docker configuration](https://github.com/supabase/supabase/blob/master/docker/CONFIG.md)
+Se houver erro, comunicar apenas a mensagem PostgreSQL e o número da linha — nunca enviar passwords ou chaves privadas. Não executar comandos `DROP SCHEMA` para corrigir erros.
