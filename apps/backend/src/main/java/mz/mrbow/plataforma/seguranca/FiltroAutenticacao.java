@@ -55,7 +55,6 @@ public class FiltroAutenticacao extends OncePerRequestFilter {
             var autenticacao = UsernamePasswordAuthenticationToken.authenticated(
                 fa, null, List.of(new SimpleGrantedAuthority("ROLE_FA")));
             SecurityContextHolder.getContext().setAuthentication(autenticacao);
-            cadeia.doFilter(pedido, resposta);
         } catch (RestClientResponseException erro) {
             if (erro.getStatusCode().is4xxClientError()) {
                 naoAutorizado(resposta);
@@ -66,6 +65,15 @@ public class FiltroAutenticacao extends OncePerRequestFilter {
             servicoIndisponivel(resposta);
         } catch (IllegalArgumentException erro) {
             naoAutorizado(resposta);
+        }
+        if (resposta.isCommitted() || resposta.getStatus() >= 400) {
+            SecurityContextHolder.clearContext();
+            return;
+        }
+        // Erros do domínio são tratados pelos controladores, nunca como falhas
+        // de autenticação. O filtro valida somente o token de entrada.
+        try {
+            cadeia.doFilter(pedido, resposta);
         } finally {
             SecurityContextHolder.clearContext();
         }

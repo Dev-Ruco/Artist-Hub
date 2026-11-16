@@ -15,3 +15,5 @@ build/
 *.keystore
 *.mobileprovision
 coverage/
+target/
+!.env.exemplo
