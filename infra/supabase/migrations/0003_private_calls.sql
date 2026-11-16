@@ -97,7 +97,14 @@ create policy call_services_staff_read on artist_hub.call_services
 -- Settings e sessions nunca sao acessiveis directamente ao cliente.
 create policy call_bookings_owner_read on artist_hub.call_bookings
   for select to authenticated
-  using (fan_id=(select auth.uid()) or artist_hub.is_artist_staff(artist_id));
+  using (
+    fan_id=(select auth.uid()) or exists (
+      select 1 from artist_hub.artist_staff staff
+      where staff.artist_id=call_bookings.artist_id
+        and staff.user_id=(select auth.uid())
+        and staff.role in ('owner','manager')
+    )
+  );
 
 grant select on artist_hub.call_services to anon, authenticated;
 grant select on artist_hub.call_bookings to authenticated;
