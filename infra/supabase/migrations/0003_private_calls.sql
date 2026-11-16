@@ -187,6 +187,21 @@ begin
     raise exception 'Horario ja reservado.' using errcode='P0001';
   end if;
 
+  -- Serializa reservas do mesmo artista e impede sessoes sobrepostas,
+  -- mesmo quando o gestor criou alternativas de audio/video no mesmo horario.
+  perform 1 from artist_hub.artists a where a.id=v_slot.artist_id for update;
+  if exists (
+    select 1 from artist_hub.call_bookings b
+    join artist_hub.call_slots other on other.id=b.slot_id
+    where b.artist_id=v_slot.artist_id
+      and other.starts_at < v_slot.ends_at
+      and other.ends_at > v_slot.starts_at
+      and (b.status in ('confirmed','completed','refunded') or
+        (b.status='awaiting_payment' and b.payment_deadline>now()))
+  ) then
+    raise exception 'O artista ja tem uma sessao nesse periodo.' using errcode='P0001';
+  end if;
+
   if (select count(*) from artist_hub.call_bookings b
       where b.fan_id=v_fan and b.status='awaiting_payment'
         and b.payment_deadline>now()) >= 3 then
@@ -224,6 +239,13 @@ begin
   select * into v_booking from artist_hub.call_bookings where id=p_booking_id for update;
   if not found then raise exception 'Reserva inexistente.'; end if;
   if v_booking.status='confirmed' and v_booking.payment_id is not null then
+    if not exists (
+      select 1 from artist_hub.payments p
+      where p.id=v_booking.payment_id and p.provider=p_provider
+        and p.external_reference=p_external_reference and p.status='confirmed'
+    ) then
+      raise exception 'Referencia de pagamento inconsistente.';
+    end if;
     return v_booking.payment_id;
   end if;
   if v_booking.status<>'awaiting_payment' or v_booking.payment_deadline<=now() then
@@ -248,6 +270,27 @@ end;
 $$;
 revoke all on function artist_hub.confirm_call_booking_payment(uuid,text,text) from public;
 grant execute on function artist_hub.confirm_call_booking_payment(uuid,text,text) to service_role;
+
+-- O fa consulta apenas as suas reservas, sem acesso ao nome da sala WebRTC.
+create or replace function artist_hub.list_my_call_bookings(p_artist_id uuid)
+returns table (
+  booking_id uuid, service_title text, call_kind text, duration_minutes integer,
+  starts_at timestamptz, ends_at timestamptz, booking_status text,
+  price_minor bigint, currency char(3), payment_deadline timestamptz
+)
+language sql stable security definer set search_path=''
+as $
+  select b.id, sv.title, sv.kind, sv.duration_minutes,
+    sl.starts_at, sl.ends_at, b.status, b.price_minor, b.currency, b.payment_deadline
+  from artist_hub.call_bookings b
+  join artist_hub.call_slots sl on sl.id=b.slot_id
+  join artist_hub.call_services sv on sv.id=b.service_id
+  where b.artist_id=p_artist_id and b.fan_id=(select auth.uid())
+  order by sl.starts_at desc
+  limit 40;
+$;
+revoke all on function artist_hub.list_my_call_bookings(uuid) from public;
+grant execute on function artist_hub.list_my_call_bookings(uuid) to authenticated;
 
 -- Servidor de chamadas: verificar identidade do fan ou staff e janela temporal.
 -- Este metodo NAO gera token WebRTC e NAO deve ser exposto a anon/authenticated.
