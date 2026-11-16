@@ -13,6 +13,8 @@ jobs:
           node-version: '22'
       - run: npm install --no-audit --no-fund
       - run: npm run typecheck
+      - name: Verificar sintaxe do gateway de chamadas
+        run: node --check services/call-gateway/server.mjs
       - run: npm run build:web
       - name: Confirmar exportação Web
         run: test -s apps/mobile/dist/index.html
