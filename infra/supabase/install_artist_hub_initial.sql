@@ -22,6 +22,9 @@ BEGIN
   IF to_regnamespace('artist_hub') IS NOT NULL THEN
     RAISE EXCEPTION 'O schema artist_hub ja existe. Instalacao interrompida para proteger dados. Nao executar novamente.';
   END IF;
+  IF to_regprocedure('pg_catalog.gen_random_uuid()') IS NULL THEN
+    RAISE EXCEPTION 'Este PostgreSQL nao inclui gen_random_uuid(). Necessaria versao compativel antes da instalacao.';
+  END IF;
   IF to_regclass('auth.users') IS NULL THEN
     RAISE EXCEPTION 'Supabase Auth auth.users nao encontrado. Confirme a instancia antes da instalacao.';
   END IF;
@@ -36,7 +39,7 @@ $install_guard$;
 -- Executar no Supabase PostgreSQL com uma conta administrativa.
 -- Configurar artist_hub como exposed schema no PostgREST ANTES de utilizar o cliente mobile.
 -- Nenhum service_role ou segredo deverá ser incluído na aplicação móvel.
-create extension if not exists pgcrypto;
+-- gen_random_uuid() e integrado no PostgreSQL actual; nao instalar extensoes globais.
 create schema if not exists artist_hub;
 
 grant usage on schema artist_hub to anon, authenticated, service_role;
