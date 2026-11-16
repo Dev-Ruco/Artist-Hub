@@ -2,6 +2,7 @@ import 'react-native-url-polyfill/auto';
 import { AppState, Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
+import { apiConfigurada } from './api';
 
 // A app Mr. Bow usa este Supabase self-hosted por omissão.
 // A variável de ambiente pode substituir o URL em futuros deployments.
@@ -14,11 +15,11 @@ const key = (
   ''
 ).trim();
 const placeholders = ['COLOCAR_CHAVE_PUBLICAVEL', 'SUA_CHAVE_ANON', 'YOUR_ANON_KEY'];
-export const isDemoMode = !key || placeholders.includes(key);
+export const isDemoMode = !apiConfigurada && (!key || placeholders.includes(key));
 export const supabaseUrl = url;
 export const supabaseSchema = 'mrbowapp';
 
-export const supabase: SupabaseClient | null = isDemoMode
+export const supabase: SupabaseClient | null = !key || placeholders.includes(key)
   ? null
   : createClient(url!, key!, {
       auth: {
