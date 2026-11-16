@@ -62,3 +62,21 @@ O produto é uma **aplicação exclusiva de Mr. Bow**, não um marketplace. As f
 - [ ] Funcionalidades VIP e pagamentos seguros, depois da aprovação das políticas de lojas
 
 Ver `docs/experiencia-fas-mr-bow.md`.
+
+
+## Fase 3 — experiências privadas com Mr. Bow (16/11/2026)
+
+- [x] Ecrã nativo para escolher chamada de áudio ou vídeo, duração e horário, com preços dependentes de configuração real
+- [x] Estrutura PostgreSQL para catálogo, agenda, reserva provisória, pagamentos e sessões isoladas
+- [x] RPC para horários disponíveis e histórico de reservas do próprio fã
+- [x] Segurança: reservas sobrepostas impedidas, bloqueio de vendas por omissão e confirmação financeira exclusiva do servidor
+- [x] Gateway privado preparado para validar JWT Supabase e emitir tokens LiveKit apenas a participantes autorizados
+- [x] Dockerfile do gateway e validação de sintaxe no CI
+- [ ] Aplicar migração 0003 em Supabase de testes e verificar RLS/conflitos
+- [ ] Criar painel de preços, disponibilidade e gestão da agenda de Mr. Bow
+- [ ] Escolher meio de pagamento e integrar checkout com webhook verificado e idempotente
+- [ ] Instalar LiveKit React Native em build de desenvolvimento compatível com Expo e testar Android/iOS
+- [ ] Adicionar encerramento automático das sessões e gestão de cancelamentos, não comparências e reembolsos
+- [ ] Publicar após testes de segurança, qualidade e conformidade
+
+Ver `docs/chamadas-privadas-mr-bow.md`.

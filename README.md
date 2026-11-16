@@ -89,6 +89,15 @@ O projecto inclui o fluxo de registo com nome, pedido de recuperação de acesso
 
 O envio de email de recuperação está preparado, mas a conclusão através de deep link nativo ainda necessita de implementação e testes. Chat privado, moderação e pagamentos continuam desactivados.
 
+## Chamadas privadas — áudio e vídeo
+
+A secção **Falar** inclui acesso a um novo ecrã de experiências individuais de áudio/vídeo com Mr. Bow. Existem estruturas para serviços, horários, reservas, pagamentos e autorização de chamada; **as reservas, cobranças e chamadas verdadeiras continuam desactivadas** até existir gateway financeiro, infra-estrutura LiveKit, testes de segurança e autorização de publicação.
+
+- [Ecrã da aplicação](apps/mobile/app/calls/index.tsx)
+- [Migração 0003](infra/supabase/migrations/0003_private_calls.sql)
+- [Gateway privado de LiveKit](services/call-gateway/README.md)
+- [Plano de implementação e segurança](docs/chamadas-privadas-mr-bow.md)
+
 ## Documentação
 
 - [Decisão de produto — aplicação exclusiva de Mr. Bow](docs/decisao-produto-mr-bow.md)
