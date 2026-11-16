@@ -8,6 +8,7 @@ import { ActionButton, DemoFlag, Eyebrow, Heading, Screen } from '../../src/comp
 import { useAuth } from '../../src/context/AuthContext';
 import { useArtist } from '../../src/context/ArtistContext';
 import { db, isDemoMode, supabase } from '../../src/lib/supabase';
+import { apiConfigurada, pedirApi } from '../../src/lib/api';
 import { palette } from '../../src/theme/tokens';
 import { BackendConnectionCard } from '../../src/components/BackendConnectionCard';
 
@@ -19,7 +20,7 @@ const membershipTitle = (level: string) => {
 };
 
 export default function ProfileScreen() {
-  const { session, signOut, loading: authLoading } = useAuth();
+  const { session, signOut, actualizarNome, loading: authLoading } = useAuth();
   const { selected } = useArtist();
   const userId = session?.user.id;
   const artistId = selected?.id;
@@ -42,6 +43,28 @@ export default function ProfileScreen() {
     setLoading(true);
     async function loadProfile() {
       try {
+        if (apiConfigurada) {
+          const dados = await pedirApi<{ nome?: string }>('/perfil', {
+            token: session?.access_token,
+          });
+          if (!active) return;
+          if (dados.nome) setFullName(dados.nome);
+          if (artistId) {
+            const [adesao, perguntas] = await Promise.all([
+              pedirApi<{ aderiu: boolean; adesao?: { nivel: string; dataAdesao: string } }>(
+                '/comunidade/adesao', { token: session?.access_token }),
+              pedirApi<Array<{ identificador: string }>>(
+                '/perguntas', { token: session?.access_token }),
+            ]);
+            if (active) {
+              setMembership(adesao.aderiu && adesao.adesao
+                ? { level: adesao.adesao.nivel, joined_at: adesao.adesao.dataAdesao }
+                : null);
+              setQuestionCount(perguntas.length);
+            }
+          }
+          return;
+        }
         const profileResult = await db().from('profiles')
           .select('display_name').eq('user_id', userId!).maybeSingle();
         if (profileResult.error) throw profileResult.error;
@@ -70,10 +93,10 @@ export default function ProfileScreen() {
     }
     void loadProfile();
     return () => { active = false; };
-  }, [userId, artistId, session?.user.user_metadata?.full_name]);
+  }, [userId, artistId, session?.user.user_metadata?.full_name, session?.access_token]);
 
   async function save() {
-    if (!userId || !supabase || saving) return;
+    if (!userId || (!supabase && !apiConfigurada) || saving) return;
     const name = fullName.trim().replace(/\s+/g, ' ');
     if (name.length < 2 || name.length > 80) {
       setMessage('O nome deve ter entre 2 e 80 caracteres.');
@@ -82,6 +105,14 @@ export default function ProfileScreen() {
     setSaving(true);
     setMessage('');
     try {
+      if (apiConfigurada) {
+        await pedirApi('/perfil', {
+          metodo: 'PATCH', token: session?.access_token, corpo: { nome },
+        });
+        await actualizarNome(name);
+        setMessage('Perfil actualizado com sucesso.');
+        return;
+      }
       const { error } = await db().from('profiles')
         .upsert({ user_id: userId, display_name: name }, { onConflict: 'user_id' });
       if (error) throw error;

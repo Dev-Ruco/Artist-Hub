@@ -147,7 +147,7 @@ export default function LoginScreen() {
     </Pressable> : <Pressable onPress={() => switchMode('register')} style={styles.footerLink}>
       <Text style={styles.linkText}>Ainda não tens conta? Regista-te</Text>
     </Pressable>}
-    <Text style={styles.note}>O registo e a recuperação só funcionam com a autenticação Supabase configurada.</Text>
+    <Text style={styles.note}>O registo e a recuperação utilizam o serviço de autenticação seguro da plataforma.</Text>
   </Screen>;
 }
 

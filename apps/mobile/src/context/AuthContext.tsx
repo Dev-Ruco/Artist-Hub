@@ -29,6 +29,7 @@ type ContextoAutenticacao = {
   signUp: (correio: string, palavraPasse: string, nome: string) => Promise<string | null>;
   resetPassword: (correio: string) => Promise<string | null>;
   signOut: () => Promise<void>;
+  actualizarNome: (nome: string) => Promise<void>;
 };
 const Contexto = createContext<ContextoAutenticacao | undefined>(undefined);
 
@@ -185,6 +186,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const { error } = await supabase.auth.resetPasswordForEmail(correio);
         return error?.message || null;
       } catch (erro) { return textoErro(erro); }
+    },
+    async actualizarNome(nome) {
+      if (apiConfigurada) {
+        const valor = await lerSessao();
+        if (!valor) return;
+        const guardada = JSON.parse(valor) as SessaoGuardada;
+        const actualizada = { ...guardada, nome };
+        await guardarSessao(JSON.stringify(actualizada));
+        setSession(construirSessao(actualizada));
+        return;
+      }
+      if (supabase) await supabase.auth.updateUser({ data: { full_name: nome } });
     },
     async signOut() {
       if (apiConfigurada) {
