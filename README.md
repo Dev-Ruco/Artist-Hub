@@ -1,6 +1,6 @@
-# Artist Hub — Plataforma multiartista · Starter React Native
+# Mr. Bow — Aplicação móvel exclusiva (núcleo reutilizável)
 
-Projecto-piloto de aplicação móvel Android/iOS **nativa**, criada com React Native, Expo SDK 58, Expo Router e Supabase. Inclui migração PostgreSQL para isolamento multiartista e um modo de demonstração com dados totalmente fictícios.
+Aplicação móvel Android/iOS **de Mr. Bow**, construída com React Native, Expo Router e Supabase. Esta distribuição contém apenas a comunidade de Mr. Bow; a base técnica poderá ser reutilizada futuramente para criar aplicações separadas para outros artistas. Sem selector público de artistas.
 
 ## Conteúdo
 
@@ -47,7 +47,7 @@ Use o ambiente de desenvolvimento Expo/QR de acordo com a versão instalada no d
 4. Copie `apps/mobile/.env.example` para `apps/mobile/.env` e substitua o URL e a chave publicável. **Não use service_role.**
 5. Reinicie o Expo com `npm run start` e verifique os ecrãs e as consultas. Em ambiente real, a autenticação exige serviço de email/confirmacão correctamente configurado.
 
-Para uma app exclusiva de um artista, defina `EXPO_PUBLIC_ARTIST_SLUG=artista-piloto`. O exemplo multiartista usa o campo vazio. O nome, ícone e bundle ID de produção serão alterados por marca antes da publicação.
+A aplicação é exclusiva de Mr. Bow por omissão. A configuração está em `apps/mobile/src/config/brand.ts`; o ficheiro `.env.example` fixa `EXPO_PUBLIC_ARTIST_SLUG=mr-bow` e `EXPO_PUBLIC_ARTIST_NAME=Mr. Bow`. O backend deve ter um artista com o slug `mr-bow`.
 
 ## Android/iOS — build instalável
 
@@ -61,18 +61,17 @@ Os comandos acima são instruções para executar no seu computador/ambiente EAS
 
 ## GitHub
 
-Crie um repositório privado novo (ex.: `Dev-Ruco/artist-platform`) e, na raiz desta pasta:
+Repositório já criado: `https://github.com/Dev-Ruco/Artist-Hub`. Para o actualizar, na raiz da pasta:
 
 ```bash
-git init
-git branch -M main
+git pull origin main
+# Alterar o codigo, validar e criar um commit apenas quando houver mudancas.
 git add .
-git commit -m "feat: starter React Native multiartista e schema seguro"
-git remote add origin https://github.com/Dev-Ruco/artist-platform.git
-git push -u origin main
+git commit -m "feat: actualizar aplicacao Mr. Bow"
+git push origin main
 ```
 
-O URL acima só será válido **depois** de criar o repositório. Nenhum repositório remoto foi criado ou modificado nesta entrega.
+
 
 ## Limitações do starter
 
@@ -82,6 +81,8 @@ O URL acima só será válido **depois** de criar o repositório. Nenhum reposit
 - Não usar como aplicação de produção sem os testes de RLS, o fluxo de moderação e a validação de segurança indicados nos documentos.
 
 ## Documentação
+
+- [Decisão de produto — aplicação exclusiva de Mr. Bow](docs/decisao-produto-mr-bow.md)
 
 - [Especificação técnica](docs/especificacao-tecnica.md)
 - [Arquitectura multiartista](docs/arquitectura-multiartista.md)

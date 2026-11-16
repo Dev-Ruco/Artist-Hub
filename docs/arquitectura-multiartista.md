@@ -1,5 +1,7 @@
 # Arquitectura multiartista
 
+**Decisão actual (Novembro de 2026):** o produto publicado é uma aplicação **exclusiva de Mr. Bow**. O núcleo do sistema permanece tecnicamente reutilizável para futuras aplicações independentes de outros artistas. Não existe selector público nem marketplace na aplicação Mr. Bow. Ver [decisão de produto](decisao-produto-mr-bow.md).
+
 ## Princípio nuclear
 
 Uma única plataforma gere múltiplas comunidades, mas **cada registo de negócio pertence a um `artist_id`**. Contas de fãs podem associar-se a vários artistas; os direitos e os pagamentos não são transferíveis entre comunidades sem regra explícita.
@@ -28,7 +30,7 @@ Gateway financeiro -> Webhook verificado -> entitlement -> app
 
 ## Modelos de distribuição
 
-1. **Piloto:** uma app com selector para validar o núcleo multiartista, em modo de demonstração.
+1. **Piloto actual:** uma app apenas de Mr. Bow, com identidade e conteúdo exclusivos, sem selector de outros artistas.
 2. **White-label:** build separada para cada artista, com `EXPO_PUBLIC_ARTIST_SLUG` (já aceite no starter), nome, bundle ID, ícone e esquema visual próprios. A distribuição usa o mesmo código, nunca dados cruzados.
 3. **Marketplace:** opcionalmente uma aplicação agregadora com várias comunidades. Não é necessária para a primeira versão comercial.
 

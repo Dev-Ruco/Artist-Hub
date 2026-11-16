@@ -4,11 +4,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { HomeHero } from '../../src/components/HomeHero';
-import { ArtistSwitcher, DemoFlag, EmptyState, Eyebrow, PostCard } from '../../src/components/UI';
+import { DemoFlag, EmptyState, PostCard } from '../../src/components/UI';
 import { useArtist } from '../../src/context/ArtistContext';
 import { useAuth } from '../../src/context/AuthContext';
 import { useArtistContent } from '../../src/hooks/useArtistContent';
 import { palette } from '../../src/theme/tokens';
+import { BRAND_ARTIST_NAME } from '../../src/config/brand';
 import type { Post } from '../../src/types/domain';
 
 function welcomeMessage() {
@@ -59,7 +60,7 @@ export default function HomeScreen() {
           onUpdates={() => scroll.current?.scrollTo({ y: newsTop.current, animated: true })}
           onCommunity={() => router.push('/(tabs)/community')}
         /> : <View style={{ paddingHorizontal: 22, paddingVertical: 40 }}>
-          <EmptyState title="Comunidade indisponível" detail="Escolhe um artista para começar."/>
+          <EmptyState title="Comunidade indisponível" detail={"Não foi possível carregar a comunidade de " + BRAND_ARTIST_NAME + "."}/>
         </View>}
         <View onLayout={event => { newsTop.current = event.nativeEvent.layout.y; }}
           style={{ paddingHorizontal: desktop ? 52 : 22, paddingTop: 43, gap: 20,
@@ -80,10 +81,6 @@ export default function HomeScreen() {
               onOpen={() => router.push('/(tabs)/community')}/>)}
           </View> : null}
           {posts.length > 2 ? posts.slice(2).map(post => <PostCard key={post.id} post={post}/>) : null}
-          <View style={{ marginTop: 15, gap: 12 }}>
-            <Eyebrow>DESCOBRE OUTROS UNIVERSOS</Eyebrow>
-            <ArtistSwitcher/>
-          </View>
         </View>
       </View>
     </ScrollView>

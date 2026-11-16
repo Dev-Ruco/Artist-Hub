@@ -29,7 +29,7 @@ export default function LoginScreen() {
       <Ionicons name="arrow-back" size={25} color={palette.text}/></Pressable>
     <View style={{ paddingTop: 18, gap: 10 }}><Eyebrow>A TUA COMUNIDADE ESTÁ AQUI</Eyebrow>
       <Text style={s.heading}>{mode === 'login' ? 'Bem-vindo de volta.' : 'Faz parte da comunidade.'}</Text>
-      <Text style={s.subtitle}>Uma conta, várias comunidades de artistas.</Text></View>
+      <Text style={s.subtitle}>A tua conta na comunidade de Mr. Bow.</Text></View>
     {isDemoMode ? <Text style={{ color: palette.warning, lineHeight: 19 }}>O modo de demonstração não permite registar utilizadores. Configure o Supabase para activar a autenticação.</Text> : null}
     <View style={{ gap: 13, marginTop: 20 }}>
       <TextInput accessibilityLabel="Email" keyboardType="email-address" autoCapitalize="none" autoComplete="email"

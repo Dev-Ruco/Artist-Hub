@@ -27,11 +27,11 @@ export default function CommunityScreen() {
   }
   return <Screen>
     <Eyebrow>A TUA TRIBO</Eyebrow>
-    <Heading subtitle="Acompanha, participa e fica mais perto do teu artista.">Comunidade</Heading>
+    <Heading subtitle="Acompanha, participa e aproxima-te da comunidade de Mr. Bow.">Comunidade</Heading>
     <DemoFlag />
     <View style={{ backgroundColor: palette.surfaceRaised, borderRadius: 24, padding: 21, gap: 14 }}>
       <Ionicons name="people-circle-outline" color={palette.accent} size={35}/>
-      <Text style={{ color: palette.text, fontSize: 19, fontWeight: '800' }}>{selected?.display_name || 'Escolhe um artista'}</Text>
+      <Text style={{ color: palette.text, fontSize: 19, fontWeight: '800' }}>{selected?.display_name || 'Mr. Bow'}</Text>
       <Text style={{ color: palette.muted, lineHeight: 21, fontSize: 13 }}>Segue as publicações e passa a fazer parte da comunidade oficial. A conversa em tempo real será activada numa fase posterior.</Text>
       <ActionButton label={joining ? 'A registar...' : 'Aderir à comunidade'} onPress={() => void join()} disabled={joining || !selected} />
     </View>

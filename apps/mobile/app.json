@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "Artist Hub - Piloto",
+    "name": "Mr. Bow",
     "slug": "ruco",
-    "scheme": "artisthub",
+    "scheme": "mrbow",
     "version": "0.1.0",
     "orientation": "portrait",
     "userInterfaceStyle": "dark",
@@ -10,10 +10,10 @@
     "backgroundColor": "#080A0F",
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "mz.artistplatform.pilot"
+      "bundleIdentifier": "mz.mrbow.app"
     },
     "android": {
-      "package": "mz.artistplatform.pilot",
+      "package": "mz.mrbow.app",
       "adaptiveIcon": {
         "backgroundColor": "#080A0F"
       }
@@ -26,12 +26,12 @@
       "typedRoutes": true
     },
     "extra": {
-      "pilotArtistSlug": "artista-piloto"
+      "pilotArtistSlug": "mr-bow"
     },
     "web": {
       "bundler": "metro",
       "output": "single",
-      "name": "Artist Hub — Piloto"
+      "name": "Mr. Bow"
     },
     "owner": "ruco222"
   }
