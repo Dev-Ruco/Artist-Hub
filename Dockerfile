@@ -7,6 +7,14 @@ COPY apps/mobile/package.json ./apps/mobile/package.json
 RUN npm install --no-audit --no-fund
 COPY . .
 ENV EXPO_NO_TELEMETRY=1
+
+# Expo incorpora estas variaveis PUBLICAS no bundle Web durante o build.
+# No Coolify, activar Available at build time para estes campos.
+# Nunca passar service_role, JWT_SECRET ou password PostgreSQL.
+ARG EXPO_PUBLIC_SUPABASE_URL=https://supabase.datacenterhub.tech
+ARG EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+ENV EXPO_PUBLIC_SUPABASE_URL=${EXPO_PUBLIC_SUPABASE_URL}
+ENV EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY=${EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY}
 WORKDIR /usr/src/artist-hub/apps/mobile
 RUN npx expo export --platform web
 

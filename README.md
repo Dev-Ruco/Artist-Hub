@@ -41,7 +41,7 @@ Use o ambiente de desenvolvimento Expo/QR de acordo com a versão instalada no d
 
 ## Ligar Supabase real
 
-**No Supabase self-hosted já existe o esquema vazio `mrbowapp`.** Para o instalar pela primeira vez, utilizar [o instalador adaptado](infra/supabase/install_mrbowapp_existing_schema.sql), depois de fazer backup. Não executar o instalador antigo. Seguir [as instruções de instalação](docs/instalacao-supabase-self-hosted-mr-bow.md).
+**O esquema `mrbowapp` já foi instalado no Supabase self-hosted**, com 18 tabelas protegidas por RLS e o artista Mr. Bow activo. Não executar novamente o instalador inicial. Para ligar a aplicação real ao backend, seguir [a configuração de integração](docs/ligacao-supabase-mrbowapp.md).
 
 
 1. Se a instância tiver o esquema `mrbowapp` vazio, executar apenas `infra/supabase/install_mrbowapp_existing_schema.sql` (que agrega as três migrações numa transacção).
@@ -51,6 +51,8 @@ Use o ambiente de desenvolvimento Expo/QR de acordo com a versão instalada no d
 5. Reinicie o Expo com `npm run start` e verifique os ecrãs e as consultas. Em ambiente real, a autenticação exige serviço de email/confirmacão correctamente configurado.
 
 A aplicação é exclusiva de Mr. Bow por omissão. A configuração está em `apps/mobile/src/config/brand.ts`; o ficheiro `.env.example` fixa `EXPO_PUBLIC_ARTIST_SLUG=mr-bow` e `EXPO_PUBLIC_ARTIST_NAME=Mr. Bow`. O backend deve ter um artista com o slug `mr-bow`.
+
+A pré-visualização pode ser compilada no [Coolify](docs/coolify.md) quando as variáveis públicas estiverem definidas em tempo de build. O URL do Supabase está configurado; **a chave pública anon ainda precisa de ser adicionada** à plataforma de compilação (Expo ou Coolify).
 
 ## Android/iOS — build instalável
 

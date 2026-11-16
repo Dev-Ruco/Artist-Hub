@@ -1,29 +1,40 @@
-# Publicação no Coolify — Web de demonstração
+# Pré-visualização Web de Mr. Bow no Coolify
 
-O Artist Hub é, em primeiro lugar, uma aplicação React Native para Android/iOS. O Dockerfile publica **apenas** a versão de demonstração Web da aplicação, utilizando Expo Web e Nginx.
+A aplicação é nativa em React Native/Expo. O Coolify aloja apenas uma versão Web de teste, separada do Supabase self-hosted.
+
+O ambiente Supabase existente foi confirmado com:
+- URL: `https://supabase.datacenterhub.tech`
+- Esquema de dados: `mrbowapp` (18 tabelas com RLS)
+- Artista: `mr-bow`, nome `Mr. Bow`
+
+**Não alterar o Docker Compose do Supabase para instalar a aplicação Web.** A aplicação deve ser um recurso separado no Coolify.
 
 ## Configuração no Coolify
 
-1. Abra a aplicação correspondente ao repositório `Dev-Ruco/Artist-Hub`.
-2. Em **General**, confirme Git Source = `main` e **Base Directory** = `/` (raiz).
-3. Escolha **Build Pack = Dockerfile**, com **Dockerfile Location = `/Dockerfile`**.
-4. Configure **Ports Exposes = `80`**, pois o servidor Nginx escuta na porta 80 dentro do contentor.
-5. Deixe **Ports Mappings** vazio, quando utilizar o domínio público do proxy.
-6. Grave e execute **Redeploy**. Se o serviço antigo tiver sido criado como Nixpacks/Railpack, confirme que a alteração do Build Pack realmente foi aplicada.
-7. Confirme nos *deployment logs* a construção do Expo Web e o arranque do Nginx. O URL temporário deve mostrar a demonstração com a faixa “Dados fictícios”.
-8. Opcionalmente, use `/healthz` no URL temporário para confirmar resposta `ok`.
+1. Abre a aplicação GitHub do repositório `Dev-Ruco/Artist-Hub` (ou cria uma aplicação separada para este repositório).
+2. Em General, confirma a branch `main`, Base Directory `/` e Build Pack/Build Strategy `Dockerfile`.
+3. O caminho do Dockerfile é `/Dockerfile`. Configura a porta interna `80`.
+4. Em **Environment Variables**, define:
 
-## Se persistir 502 Bad Gateway
+   | Name | Value | Build time |
+   |---|---|---|
+   | `EXPO_PUBLIC_SUPABASE_URL` | `https://supabase.datacenterhub.tech` | Sim |
+   | `EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Chave pública **anon** do teu Supabase | Sim |
 
-- Confirme o estado do contentor (Running/Healthy) e os *Runtime Logs*.
-- Em **General**, verifique que a porta exposta é **80**, e não 3000, 8080 nem 8081.
-- Verifique o **Domain** configurado no Coolify: deve corresponder ao host que está a abrir.
-- Confirme que o proxy Coolify está activo e que o serviço partilha a rede necessária.
-- Se o build falhar, copie o erro concreto dos *Deployment Logs*; o URL não funcionará antes de o contentor estar em execução.
+5. Se o Coolify utilizar a opção **Advanced → Build → Build arguments**, mantém a configuração compatível com o Dockerfile, que já declara os respectivos `ARG`. A modalidade *Managed manually in Dockerfile* evita declarações duplicadas quando o Coolify permitir.
+6. Guarda e executa um novo **Deploy**, e não apenas Restart, porque o Expo incorpora as variáveis no JavaScript durante a compilação.
+7. Abre a URL publicada, entra em **Perfil → Ligação à base de dados → Testar ligação**. O resultado esperado é o registo activo de Mr. Bow.
 
-## Limitações
+O valor `anon` é uma chave pública incluída no cliente, mas **nunca utilizar `service_role` nem outros segredos**.
 
-- Não é um APK nem um IPA. A compilação móvel será feita posteriormente com EAS Build.
-- Sem variáveis `EXPO_PUBLIC_SUPABASE_URL` e `EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, funciona em modo demonstrativo.
-- Para ligar o backend em produção, as variáveis `EXPO_PUBLIC_*` são incorporadas **no build**. Nunca coloque chaves secretas neste formato.
-- O Nginx serve um SPA estático; não existem serviços API neste contentor.
+## Se o teste falhar
+
+- Não aparece a ligação no ecrã: verifica que o Coolify publicou o último commit da branch main.
+- Continua a mostrar modo de demonstração: confirma que a chave `EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY` está definida, com **Available at build time** activo. É necessário fazer novo Deploy.
+- `PGRST106`: verifica que o serviço REST/PostgREST do Supabase expõe `mrbowapp`, sem retirar os outros esquemas.
+- API inacessível: confirma o certificado HTTPS, DNS, Kong, CORS e que a instância continua saudável.
+- 502 Bad Gateway na pré-visualização: confirma a porta interna `80` e os logs Nginx.
+
+## Limites da pré-visualização Web
+
+Não substitui a aplicação nativa, APK/IPA, nem testa chamadas LiveKit no iOS/Android. Compras, reservas e chamadas continuam bloqueadas.
