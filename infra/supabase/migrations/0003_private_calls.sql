@@ -286,7 +286,7 @@ returns table (
   price_minor bigint, currency char(3), payment_deadline timestamptz
 )
 language sql stable security definer set search_path=''
-as $
+as $$
   select b.id, sv.title, sv.kind, sv.duration_minutes,
     sl.starts_at, sl.ends_at, b.status, b.price_minor, b.currency, b.payment_deadline
   from artist_hub.call_bookings b
@@ -295,7 +295,7 @@ as $
   where b.artist_id=p_artist_id and b.fan_id=(select auth.uid())
   order by sl.starts_at desc
   limit 40;
-$;
+$$;
 revoke all on function artist_hub.list_my_call_bookings(uuid) from public;
 grant execute on function artist_hub.list_my_call_bookings(uuid) to authenticated;
 
