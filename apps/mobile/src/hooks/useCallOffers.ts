@@ -39,7 +39,7 @@ export function useCallOffers(artistId: string | undefined, userId: string | und
           id: item.identificador, artist_id: artistId, kind: item.tipo,
           title: item.titulo, description: item.descricao,
           duration_minutes: item.duracaoMinutos, price_minor: item.precoCentimos,
-          currency: item.moeda,
+          currency: 'MZN',
         }));
         setServices(linhas);
         setSelectedServiceId(current => linhas.some(item => item.id === current)
