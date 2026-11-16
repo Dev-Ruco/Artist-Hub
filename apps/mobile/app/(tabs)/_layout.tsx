@@ -14,7 +14,7 @@ export default function TabLayout() {
       height: 68, paddingTop: 8, paddingBottom: 11 }, tabBarLabelStyle: { fontSize: 10, fontWeight: '700' } }}>
     <Tabs.Screen name="index" options={{ title: 'Início', tabBarIcon: ({ focused, color }) => <TabIcon name={focused ? 'home' : 'home-outline'} focused={focused} color={color} /> }} />
     <Tabs.Screen name="community" options={{ title: 'Comunidade', tabBarIcon: ({ focused, color }) => <TabIcon name={focused ? 'people' : 'people-outline'} focused={focused} color={color} /> }} />
-    <Tabs.Screen name="artist" options={{ title: 'Artista', tabBarIcon: ({ focused, color }) => <TabIcon name={focused ? 'mic' : 'mic-outline'} focused={focused} color={color} /> }} />
+    <Tabs.Screen name="artist" options={{ title: 'Falar', tabBarIcon: ({ focused, color }) => <TabIcon name={focused ? 'mic' : 'mic-outline'} focused={focused} color={color} /> }} />
     <Tabs.Screen name="events" options={{ title: 'Eventos', tabBarIcon: ({ focused, color }) => <TabIcon name={focused ? 'calendar' : 'calendar-outline'} focused={focused} color={color} /> }} />
     <Tabs.Screen name="profile" options={{ title: 'Perfil', tabBarIcon: ({ focused, color }) => <TabIcon name={focused ? 'person' : 'person-outline'} focused={focused} color={color} /> }} />
   </Tabs>;
