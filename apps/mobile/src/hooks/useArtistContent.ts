@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { demoEvents, demoPosts } from '../data/demo';
 import { db, isDemoMode } from '../lib/supabase';
+import { apiConfigurada, pedirApi, type PublicacaoApi, type EventoApi } from '../lib/api';
 import type { ArtistEvent, Post } from '../types/domain';
 
 export function useArtistContent(artistId: string | undefined) {
@@ -20,6 +21,43 @@ export function useArtistContent(artistId: string | undefined) {
       return;
     }
     setLoading(true);
+    if (apiConfigurada) {
+      try {
+        const [publicacoes, agenda] = await Promise.all([
+          pedirApi<PublicacaoApi[]>('/publicacoes'),
+          pedirApi<EventoApi[]>('/eventos'),
+        ]);
+        if (request !== requestNumber.current) return;
+        setPosts(publicacoes.map(item => ({
+          id: item.identificador,
+          artist_id: artistId,
+          title: item.titulo,
+          body: item.texto,
+          media_url: item.enderecoMultimedia,
+          category: item.categoria,
+          published_at: item.dataPublicacao,
+        })));
+        setEvents(agenda.map(item => ({
+          id: item.identificador,
+          artist_id: artistId,
+          title: item.titulo,
+          venue: item.local,
+          city: item.cidade,
+          starts_at: item.dataInicio,
+          ticket_url: item.enderecoBilhete,
+        })));
+        setError(null);
+      } catch (erro) {
+        if (request === requestNumber.current) {
+          setPosts([]);
+          setEvents([]);
+          setError(erro instanceof Error ? erro.message : 'API indisponível.');
+        }
+      } finally {
+        if (request === requestNumber.current) setLoading(false);
+      }
+      return;
+    }
     const [postResult, eventResult] = await Promise.all([
       db().from('posts').select('id,artist_id,title,body,media_url,category,published_at')
         .eq('artist_id', artistId).eq('status', 'published').eq('visibility', 'public')

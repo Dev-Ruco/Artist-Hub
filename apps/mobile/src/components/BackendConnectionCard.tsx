@@ -3,6 +3,7 @@ import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-nati
 import { Ionicons } from '@expo/vector-icons';
 import { BRAND_ARTIST_SLUG } from '../config/brand';
 import { db, isDemoMode, supabaseSchema, supabaseUrl } from '../lib/supabase';
+import { apiConfigurada, enderecoApi, pedirApi, type ArtistaApi } from '../lib/api';
 import { palette } from '../theme/tokens';
 
 type ConnectionStatus = 'checking' | 'connected' | 'unconfigured' | 'error';
@@ -28,6 +29,13 @@ export function BackendConnectionCard() {
     setStatus('checking');
     setMessage('A verificar a ligação ao Supabase…');
     try {
+      if (apiConfigurada) {
+        const dados = await pedirApi<ArtistaApi>('/artista');
+        if (dados.codigo !== BRAND_ARTIST_SLUG) throw new Error('Artista inesperado.');
+        setStatus('connected');
+        setMessage('Ligação à API Java confirmada. Mr. Bow foi encontrado no PostgreSQL.');
+        return;
+      }
       const { data, error } = await db().from('artists')
         .select('slug,display_name')
         .eq('slug', BRAND_ARTIST_SLUG)
@@ -58,7 +66,9 @@ export function BackendConnectionCard() {
       }
     } catch {
       setStatus('error');
-      setMessage('Não foi possível estabelecer a ligação. Verifica HTTPS, rede e configuração CORS.');
+      setMessage(apiConfigurada
+        ? 'Não foi possível consultar a API Java. Confirma o endereço, CORS e o estado do backend.'
+        : 'Não foi possível estabelecer a ligação. Verifica HTTPS, rede e configuração CORS.');
     }
   }, []);
 
@@ -72,12 +82,12 @@ export function BackendConnectionCard() {
         size={22} color={status === 'connected' ? palette.accent : palette.muted}/>
       <View style={{ flex: 1 }}>
         <Text style={styles.title}>Ligação à base de dados</Text>
-        <Text style={styles.caption}>Diagnóstico do piloto · {supabaseSchema}</Text>
+        <Text style={styles.caption}>Diagnóstico do piloto · {apiConfigurada ? 'API Java' : supabaseSchema}</Text>
       </View>
       {status === 'checking' ? <ActivityIndicator color={palette.accent} size="small"/> : null}
     </View>
     <Text style={styles.message}>{message}</Text>
-    <Text style={styles.host} numberOfLines={1}>{supabaseUrl}</Text>
+    <Text style={styles.host} numberOfLines={1}>{apiConfigurada ? enderecoApi : supabaseUrl}</Text>
     <Pressable accessibilityRole="button" disabled={status === 'checking'}
       onPress={() => void check()} style={styles.action}>
       <Ionicons name="refresh-outline" size={16} color={palette.accent}/>

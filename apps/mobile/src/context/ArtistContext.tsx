@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { demoArtists } from '../data/demo';
 import { db, isDemoMode } from '../lib/supabase';
+import { apiConfigurada, pedirApi, type ArtistaApi } from '../lib/api';
 import { BRAND_ARTIST_NAME, BRAND_ARTIST_SLUG } from '../config/brand';
 import type { Artist } from '../types/domain';
 
@@ -34,6 +35,26 @@ export function ArtistProvider({ children }: { children: React.ReactNode }) {
       return;
     }
     setLoading(true);
+    if (apiConfigurada) {
+      try {
+        const dados = await pedirApi<ArtistaApi>('/artista');
+        if (dados.codigo !== BRAND_ARTIST_SLUG) throw new Error('Artista de outra aplicação.');
+        const artista: Artist = {
+          id: dados.identificador, slug: dados.codigo, display_name: dados.nome,
+          tagline: dados.descricao, avatar_url: dados.fotografia,
+          banner_url: dados.capa, accent_color: dados.corDestaque,
+          is_verified: dados.verificado,
+        };
+        setSelected(asBrandedArtist(artista));
+        setError(null);
+      } catch (erro) {
+        setSelected(null);
+        setError(erro instanceof Error ? erro.message : 'API indisponível.');
+      } finally {
+        setLoading(false);
+      }
+      return;
+    }
     const { data, error: queryError } = await db()
       .from('artists')
       .select('id,slug,display_name,tagline,avatar_url,banner_url,accent_color,is_verified')
