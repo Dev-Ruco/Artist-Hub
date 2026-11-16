@@ -1,5 +1,5 @@
 import React from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View, type ViewStyle } from 'react-native';
+import { Image, Pressable, ScrollView, StyleSheet, Text, View, type ViewStyle } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { isDemoMode } from '../lib/supabase';
@@ -54,12 +54,18 @@ export function ArtistHero({ artist }: { artist: Artist }) {
 }
 export function PostCard({ post }: { post: Post }) {
   const category = { musica: 'MÚSICA', bastidores: 'BASTIDORES', novidade: 'NOVIDADES' }[post.category];
+  // Conteúdos de vídeo nunca são apresentados por engano como uma imagem.
+  const imageUrl = post.media_url && /^https:\/\//i.test(post.media_url) &&
+    /\.(png|jpe?g|webp)(\?|#|$)/i.test(post.media_url) ? post.media_url : null;
   return <View style={styles.card}>
     <View style={styles.cardTop}><View style={styles.categoryPill}><Text style={styles.categoryText}>{category}</Text></View>
       <Text style={styles.smallMuted}>{new Date(post.published_at).toLocaleDateString('pt-PT')}</Text></View>
+    {imageUrl ? <Image source={{ uri: imageUrl }} resizeMode="cover"
+      accessibilityLabel={'Imagem da publicação: ' + post.title}
+      style={{ width: '100%', aspectRatio: 1.55, borderRadius: 14, backgroundColor: palette.surfaceRaised }}/> : null}
     <Text style={styles.cardTitle}>{post.title}</Text><Text style={styles.cardBody}>{post.body}</Text>
     <View style={styles.cardBottom}><Ionicons name="sparkles-outline" color={palette.violet} size={15}/>
-      <Text style={styles.smallMuted}>Publicação oficial</Text></View>
+      <Text style={styles.smallMuted}>{isDemoMode ? 'Exemplo de publicação' : 'Publicação do artista'}</Text></View>
   </View>;
 }
 export function EventCard({ event }: { event: ArtistEvent }) {
