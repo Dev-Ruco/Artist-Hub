@@ -8,6 +8,7 @@ import { ActionButton, DemoFlag, EmptyState, Eyebrow, Screen } from '../../src/c
 import { useArtist } from '../../src/context/ArtistContext';
 import { useAuth } from '../../src/context/AuthContext';
 import { db, isDemoMode } from '../../src/lib/supabase';
+import { apiConfigurada, pedirApi } from '../../src/lib/api';
 import { palette } from '../../src/theme/tokens';
 
 type FanRequest = {
@@ -44,6 +45,22 @@ export default function ArtistScreen() {
     }
     setLoading(true);
     setError('');
+    if (apiConfigurada) {
+      try {
+        const dados = await pedirApi<Array<{
+          identificador: string; texto: string; estado: FanRequest['status'];
+          tipo: FanRequest['request_type']; dataCriacao: string; respostaEm: string | null;
+        }>>('/perguntas', { token: session?.access_token });
+        setRequests(dados.map(pedido => ({
+          id: pedido.identificador, body: pedido.texto, status: pedido.estado,
+          request_type: pedido.tipo, created_at: pedido.dataCriacao,
+          replied_at: pedido.respostaEm,
+        })));
+      } catch {
+        setError('Não foi possível consultar as perguntas enviadas.');
+      } finally { setLoading(false); }
+      return;
+    }
     const { data, error: queryError } = await db().from('message_requests')
       .select('id,body,status,request_type,created_at,replied_at')
       .eq('fan_id', userId).eq('artist_id', artistId)
@@ -51,7 +68,7 @@ export default function ArtistScreen() {
     if (queryError) setError('Não foi possível consultar as perguntas enviadas.');
     else setRequests((data || []) as FanRequest[]);
     setLoading(false);
-  }, [userId, artistId]);
+  }, [userId, artistId, session?.access_token]);
   useEffect(() => { void loadRequests(); }, [loadRequests]);
 
   const last24Hours = useMemo(() => {
@@ -74,6 +91,15 @@ export default function ArtistScreen() {
     if (remaining === 0) { setMessage('Atingiste o limite de três perguntas nas últimas 24 horas.'); return; }
     setSending(true);
     try {
+      if (apiConfigurada) {
+        await pedirApi('/perguntas', {
+          metodo: 'POST', token: session.access_token, corpo: { texto: content },
+        });
+        setQuestion('');
+        setMessage('Pergunta registada. Podes acompanhar o estado abaixo.');
+        await loadRequests();
+        return;
+      }
       const { error: insertError } = await db().from('message_requests').insert({
         artist_id: artistId,
         fan_id: session.user.id,
