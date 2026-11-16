@@ -80,6 +80,15 @@ git push origin main
 - Pagamentos, chats, painel de gestão, push e conteúdos VIP **não estão operacionais**.
 - Não usar como aplicação de produção sem os testes de RLS, o fluxo de moderação e a validação de segurança indicados nos documentos.
 
+## Experiência de fãs — fase 1
+
+O projecto inclui o fluxo de registo com nome, pedido de recuperação de acesso, perfil editável, adesão persistente à comunidade, publicações por categoria e histórico de perguntas à equipa de Mr. Bow. A activação com dados reais exige executar as migrações num ambiente de testes, configurar o Supabase Auth e validar as políticas RLS.
+
+- [Implementação e critérios de teste](docs/experiencia-fas-mr-bow.md)
+- [Migração de criação de perfis](infra/supabase/migrations/0002_fan_profiles.sql)
+
+O envio de email de recuperação está preparado, mas a conclusão através de deep link nativo ainda necessita de implementação e testes. Chat privado, moderação e pagamentos continuam desactivados.
+
 ## Documentação
 
 - [Decisão de produto — aplicação exclusiva de Mr. Bow](docs/decisao-produto-mr-bow.md)
