@@ -1,0 +1,28 @@
+name: Backend Java - Testes e Compilacao
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/backend/**'
+      - '.github/workflows/backend-java.yml'
+  pull_request:
+    paths:
+      - 'apps/backend/**'
+      - '.github/workflows/backend-java.yml'
+jobs:
+  validar_backend:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Instalar Java 21 e cache Maven
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+          cache-dependency-path: apps/backend/pom.xml
+      - name: Testar e compilar backend
+        run: mvn -B -ntp -f apps/backend/pom.xml verify
+      - name: Confirmar artefacto executavel
+        run: test -s apps/backend/target/plataforma-api-0.1.0.jar
