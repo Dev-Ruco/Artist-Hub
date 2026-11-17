@@ -26,3 +26,11 @@ jobs:
         run: mvn -B -ntp -f apps/backend/pom.xml verify
       - name: Confirmar artefacto executavel
         run: test -s apps/backend/target/plataforma-api-0.1.0.jar
+      - name: Verificar construcao Docker de producao
+        uses: docker/build-push-action@v6
+        with:
+          context: ./apps/backend
+          file: ./apps/backend/Dockerfile
+          push: false
+          tags: mrbow-api:teste
+

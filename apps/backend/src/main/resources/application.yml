@@ -4,10 +4,13 @@ spring:
   threads:
     virtual:
       enabled: true
+  lifecycle:
+    timeout-per-shutdown-phase: 20s
 
 server:
   port: ${PORTA_API:8080}
   forward-headers-strategy: framework
+  shutdown: graceful
   error:
     include-message: never
     include-stacktrace: never

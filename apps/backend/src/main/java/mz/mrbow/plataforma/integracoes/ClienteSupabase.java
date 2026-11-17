@@ -1,10 +1,13 @@
 package mz.mrbow.plataforma.integracoes;
 
+import java.net.http.HttpClient;
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import mz.mrbow.plataforma.configuracao.ConfiguracaoSupabase;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
+import org.springframework.http.client.JdkClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.util.UriBuilder;
@@ -31,7 +34,15 @@ public class ClienteSupabase {
 
     public ClienteSupabase(RestClient.Builder construtor, ConfiguracaoSupabase configuracao) {
         this.configuracao = configuracao;
+        // Evita bloquear uma chamada da aplicação quando o Supabase estiver lento.
+        // Timeouts limitam também as esperas dos pedidos de autenticação.
+        var transporte = HttpClient.newBuilder()
+            .connectTimeout(Duration.ofSeconds(6))
+            .build();
+        var fabrica = new JdkClientHttpRequestFactory(transporte);
+        fabrica.setReadTimeout(Duration.ofSeconds(18));
         this.cliente = construtor.baseUrl(configuracao.endereco())
+            .requestFactory(fabrica)
             .defaultHeader("apikey", configuracao.chaveAnonima())
             .build();
     }
