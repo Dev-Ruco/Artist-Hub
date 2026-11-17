@@ -1,6 +1,9 @@
 package mz.mrbow.plataforma.comum;
 
 import java.time.Instant;
+import java.util.regex.Pattern;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +16,18 @@ import org.springframework.web.client.ResourceAccessException;
 /** Mensagens previsíveis sem expor tokens, SQL ou respostas internas do servidor. */
 @RestControllerAdvice
 public class TratadorErros {
+    private static final Logger registo = LoggerFactory.getLogger(TratadorErros.class);
+    private static final Pattern CODIGO_ERRO = Pattern.compile("\\\"code\\\"\\s*:\\s*\\\"([A-Za-z0-9_]{1,30})\\\"");
+
+    /**
+     * Regista apenas o código técnico do PostgREST, não o corpo da resposta,
+     * JWT, chave de API, passwords nem dados pessoais.
+     */
+    private static String codigoSeguro(RestClientResponseException erro) {
+        var correspondencia = CODIGO_ERRO.matcher(erro.getResponseBodyAsString());
+        return correspondencia.find() ? correspondencia.group(1) : "NAO_DISPONIVEL";
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, Object>> validar(MethodArgumentNotValidException erro) {
         return mensagem(HttpStatus.BAD_REQUEST, "DADOS_INVALIDOS",
@@ -21,6 +36,8 @@ public class TratadorErros {
 
     @ExceptionHandler(RestClientResponseException.class)
     public ResponseEntity<Map<String, Object>> servicoDados(RestClientResponseException erro) {
+        registo.warn("Supabase recusou a consulta: HTTP {}, codigo {}.",
+            erro.getStatusCode().value(), codigoSeguro(erro));
         HttpStatus estado = erro.getStatusCode().value() == 409
             ? HttpStatus.CONFLICT : HttpStatus.BAD_GATEWAY;
         return mensagem(estado, "ERRO_SERVICO_DADOS",
